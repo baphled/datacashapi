@@ -93,8 +93,8 @@ class DataCash_Api {
 		$xml = xmlwriter_open_memory();
 		xmlwriter_start_element($xml, 'CardTxn');
 		xmlwriter_write_raw($xml,$card);
-		if(array_key_exists('auth',$params)) {
-			xmlwriter_write_element($xml,'auth', $params['auth']);
+		if(array_key_exists('authcode',$params)) {
+			xmlwriter_write_element($xml,'authcode', $params['authcode']);
 		}
 		xmlwriter_write_element($xml,'method', $params['method']);
 		xmlwriter_end_element($xml);
@@ -131,9 +131,27 @@ class DataCash_Api {
 		return xmlwriter_output_memory($xml,true);
 	}
 	
+	/**
+	 * Sets our transaction request
+	 *
+	 * @param 	Array	 	$dataArray 	Our request array, holds all the relevant data to create the request XML
+	 * @return 	String		$xml		The XML request we want to send to DataCash
+	 */
 	function setRequest($dataArray = array()) {
 		if(empty($dataArray)) {
 			throw new Zend_Exception('Parameters must be in array format.');
 		}
+		$auth = $this->getAuth();
+		$cardTxn = $this->setCardTxn($dataArray);
+		$txnDetails = $this->setTxnDetails($dataArray);
+		$xml = xmlwriter_open_memory();
+		xmlwriter_start_element($xml,'Request');
+		xmlwriter_write_raw($xml,$auth);
+		xmlwriter_start_element($xml,'Transaction');
+		xmlwriter_write_raw($xml,$cardTxn);
+		xmlwriter_write_raw($xml,$txnDetails);
+		xmlwriter_end_element($xml);
+		xmlwriter_end_element($xml);
+		return xmlwriter_output_memory($xml,true);
 	}
 }

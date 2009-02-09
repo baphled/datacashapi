@@ -215,8 +215,30 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected[0],$result);
 	}
 	
-	function testSetResponseThrowsExceptionIfParametersNotPassed() {
+	function testSetRequestThrowsExceptionIfParametersNotPassed() {
 		$this->setExpectedException('Zend_Exception');
-		$this->assertFalse($this->_api->setRequest());
+		$this->_api->setRequest();
+	}
+	function testSetRequestReturnsString() {
+		$fixture = $this->_fixture->find('CompleteRequest');
+		$expected = $this->_xmlFixture->find('TransactionRequest');
+		$result = $this->_api->setRequest($fixture);
+		$this->assertType('string',$result);
+		$this->assertContains('Request',$result);
+		$this->assertContains('Authentication',$result);
+		$this->assertContains('client',$result);
+		$this->assertContains('password',$result);
+		$this->assertContains('Transaction',$result);
+		$this->assertContains('CardTxn',$result);
+		$this->assertContains('Card',$result);
+		$this->assertContains('pan',$result);
+		$this->assertContains('expirydate',$result);
+		$this->assertContains('authcode',$result);
+		$this->assertContains('method',$result);
+		$this->assertContains('TxnDetails',$result);
+		$this->assertContains('merchantreference',$result);
+		$this->assertContains('amount',$result);
+		$this->assertContains('currency',$result);
+		$this->assertEquals($expected[0],$result);
 	}
 }
