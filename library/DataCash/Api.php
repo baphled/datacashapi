@@ -31,4 +31,14 @@ class DataCash_Api {
 		$config = Zend_Registry::get('general');
 		$this->_config = Zend_Registry::get($config->environment)->datacash;
 	}
+	
+	function getAuth($type = 'deposit') {
+		$xml = xmlwriter_open_memory();
+		xmlwriter_start_element($xml, 'Authentication');
+		xmlwriter_write_element($xml, 'client', $this->_config->$type->client);
+		xmlwriter_write_element($xml, 'password', $this->_config->$type->password);
+		xmlwriter_end_element($xml);
+
+		return xmlwriter_output_memory($xml, true);
+	}
 }

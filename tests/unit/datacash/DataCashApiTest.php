@@ -80,4 +80,14 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 		$this->assertNotEquals(null,$config->withdrawal->client);
 		$this->assertNotEquals(null,$config->withdrawal->password);
 	}
+	
+	function testDataCashApiCanSetupAuthenticationElementUsingGetAuth() {
+		$xmlDeposit = $this->_api->getAuth();
+		$xmlWithdrawal = $this->_api->getAuth('withdrawal');
+		$this->assertContains('Authentication',$xmlDeposit);
+		$this->assertContains('client',$xmlDeposit);
+		$this->assertContains('password',$xmlDeposit);
+		$this->assertNotEquals($xmlDeposit,$xmlWithdrawal);
+	}
+	
 }
