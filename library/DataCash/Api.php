@@ -58,13 +58,18 @@ class DataCash_Api {
 			 !array_key_exists('expirydate',$cardDataArray)) {
 			throw new Zend_Exception('Need to pass array containing cards details');
 		}
-		 
+		
 		$xml = xmlwriter_open_memory();
 		xmlwriter_start_element($xml, 'Card');
+		xmlwriter_write_element($xml,'pan',$cardDataArray['pan']);
+		xmlwriter_write_element($xml,'expirydate',$cardDataArray['expirydate']);
+		if( array_key_exists('startdate',$cardDataArray) && array_key_exists('issuenumber',$cardDataArray)) {
+			xmlwriter_write_element($xml,'startdate',$cardDataArray['startdate']);
+			xmlwriter_write_element($xml,'issuenumber',$cardDataArray['issuenumber']);
+		}
 		xmlwriter_end_element($xml);
 
 		return xmlwriter_output_memory($xml, true);
-
 	}
 	
 	function setRequest($dataArray = array()) {

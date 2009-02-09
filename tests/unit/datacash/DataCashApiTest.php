@@ -18,17 +18,20 @@ class DataCashApiWrapper extends DataCash_Api  {
 class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	
 	private $_fixture;
+	private $_xmlFixture;
 	private $_api;
 	private $_apiWrapper;
 	
 	
 	function setUp() {
 		$this->_fixture = new DataCashFixtures();
+		$this->_xmlFixture = new DataCashXMLFixtures();
 		$this->_api = new DataCash_Api();
 		$this->_apiWrapper = new DataCashApiWrapper();
 	}
 	
 	function tearDown() {
+		unset($this->_xmlFixture);
 		unset($this->_fixture);
 		unset($this->_api);
 		unset($this->_apiWrapper);
@@ -117,9 +120,25 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 		$this->assertType('string',$this->_api->setCardData($this->_fixture->find('validCard')));
 	}
 	
+	/**
+	 * All card elements contain a pan & expiry element, so these should be part of the result
+	 * regardless of the card type.
+	 *
+	 */
 	function testSetCardDataReturnsCardElementOnSuccess() {
-		$this->assertContains('Card',$this->_api->setCardData($this->_fixture->find('validCard')));
+		$fixture = $this->_fixture->find('validCard');
+		$expected = $this->_xmlFixture->find('cardPanAndStartDate');
+		$this->assertContains('Card',$this->_api->setCardData($fixture));
+		$this->assertEquals($expected[0],$this->_api->setCardData($fixture));
 	}
+	
+	function testSetCardDataPopulatesStartDateAndIssueNumberIfItPassedWithParam() {
+		$fixture = $this->_fixture->find('withIssueNum');
+		$expected = $this->_xmlFixture->find('cardIssueNumAndStartDate');
+		$this->assertEquals($expected[0],$this->_api->setCardData($fixture));
+		
+	}
+	
 	function testSetResponseThrowsExceptionIfParametersArrayIsEmpty() {
 		$this->setExpectedException('Zend_Exception');
 		$this->_api->setRequest(array());

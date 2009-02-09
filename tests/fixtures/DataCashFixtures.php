@@ -19,6 +19,7 @@ Zend_Loader::registerAutoload ();
 class DataCashFixtures extends PHPUnit_Fixture {
 	protected $_fixtures = array(
            array('ALIAS'=>'validCard', 'pan'=>34342342424234,'expirydate'=>'01/09'),
-           array('ALIAS'=>'invalidCard', 'pa'=>34342342424234,'expirdate'=>'01/09')
+           array('ALIAS'=>'invalidCard', 'pa'=>34342342424234,'expirdate'=>'01/09'),
+           array('ALIAS'=>'withIssueNum', 'pan'=>34342342424234,'expirydate'=>'01/12','startdate'=>'02/10','issuenumber'=>'01')
        );
 }
