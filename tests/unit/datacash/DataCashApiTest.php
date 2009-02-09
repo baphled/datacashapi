@@ -16,15 +16,21 @@ class DataCashApiWrapper extends DataCash_Api  {
  * $LastChangedBy: yomi $
  */
 class DataCashApiTest extends PHPUnit_Framework_TestCase {
-	private $_apiWrapper;
+	
+	private $_fixture;
 	private $_api;
+	private $_apiWrapper;
+	
 	
 	function setUp() {
+		$this->_fixture = new DataCashFixtures();
 		$this->_api = new DataCash_Api();
 		$this->_apiWrapper = new DataCashApiWrapper();
 	}
 	
 	function tearDown() {
+		unset($this->_fixture);
+		unset($this->_api);
 		unset($this->_apiWrapper);
 	}
 	/**
@@ -88,6 +94,39 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 		$this->assertContains('client',$xmlDeposit);
 		$this->assertContains('password',$xmlDeposit);
 		$this->assertNotEquals($xmlDeposit,$xmlWithdrawal);
+		$this->assertType('string', $xmlDeposit);
+		$this->assertType('string', $xmlWithdrawal);
 	}
 	
+	/**
+	 * We now need to setup card elements and make sure that we can get the
+	 * expected format.
+	 *
+	 */
+	function testSetCardDataThrowsExceptionIfParamsArrayIsEmpty() {
+		$this->setExpectedException('Zend_Exception');
+		$this->_api->setCardData(array());
+	}
+	
+	function testSetCardDataParamsMustHaveKeysPanAndExpiryDateThrowsOtherwise() {
+		$this->setExpectedException('Zend_Exception');
+		$this->_api->setCardData($this->_fixture->find('invalidCard'));
+	}
+	
+	function testSetCardDataCanTakePanAndExpiryAsMandatory() {
+		$this->assertType('string',$this->_api->setCardData($this->_fixture->find('validCard')));
+	}
+	
+	function testSetCardDataReturnsCardElementOnSuccess() {
+		$this->assertContains('Card',$this->_api->setCardData($this->_fixture->find('validCard')));
+	}
+	function testSetResponseThrowsExceptionIfParametersArrayIsEmpty() {
+		$this->setExpectedException('Zend_Exception');
+		$this->_api->setRequest(array());
+	}
+	
+	function testSetResponseThrowsExceptionIfParametersNotPassed() {
+		$this->setExpectedException('Zend_Exception');
+		$this->assertFalse($this->_api->setRequest());
+	}
 }

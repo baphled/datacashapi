@@ -32,6 +32,16 @@ class DataCash_Api {
 		$this->_config = Zend_Registry::get($config->environment)->datacash;
 	}
 	
+	/**
+	 * sets up and gets our authentication information from our
+	 * environments configuration file.
+	 * 
+	 * Will retrieve the appropriate credentials depending on whether the transaction
+	 * to be is a withdrawal or a deposit.
+	 *
+	 * @param 	String 	$type	The type of request we are about to make.
+	 * @return 	String	$xml	Our resulting XML element
+	 */
 	function getAuth($type = 'deposit') {
 		$xml = xmlwriter_open_memory();
 		xmlwriter_start_element($xml, 'Authentication');
@@ -40,5 +50,26 @@ class DataCash_Api {
 		xmlwriter_end_element($xml);
 
 		return xmlwriter_output_memory($xml, true);
+	}
+	
+	function setCardData($cardDataArray = array()) {
+		if (empty($cardDataArray) ||
+			 !array_key_exists('pan',$cardDataArray) ||
+			 !array_key_exists('expirydate',$cardDataArray)) {
+			throw new Zend_Exception('Need to pass array containing cards details');
+		}
+		 
+		$xml = xmlwriter_open_memory();
+		xmlwriter_start_element($xml, 'Card');
+		xmlwriter_end_element($xml);
+
+		return xmlwriter_output_memory($xml, true);
+
+	}
+	
+	function setRequest($dataArray = array()) {
+		if(empty($dataArray)) {
+			throw new Zend_Exception('Parameters must be in array format.');
+		}
 	}
 }
