@@ -79,6 +79,12 @@ class DataCash_Api {
 		return xmlwriter_output_memory($xml, true);
 	}
 	
+	/**
+	 * Sets out CardTxn element and returns the response.
+	 *
+	 * @param 	Array 	$params	Array storing data needed to make transaction.
+	 * @return 	String	$xml	Our CardTxn XML element.
+	 */
 	function setCardTxn($params = array()) {
 		$card = $this->setCardData($params);
 		if(!array_key_exists('method',$params)) {
@@ -94,6 +100,25 @@ class DataCash_Api {
 		xmlwriter_end_element($xml);
 
 		return xmlwriter_output_memory($xml, true);
+	}
+	
+	function setTxnDetails($params = array()) {
+		if(empty($params)) {
+			throw new Zend_Exception('Parameters must be set');
+		}
+		if(!array_key_exists('merchantreference',$params) || !array_key_exists('amount',$params)) {
+			throw new Zend_Exception('Must supply merchant reference & amount');
+		}
+		$xml = xmlwriter_open_memory();
+		xmlwriter_start_element($xml,'TxnDetails');
+		
+		xmlwriter_write_element($xml,'merchantreference',$params['merchantreference']);
+		xmlwriter_start_element($xml,'amount');
+		xmlwriter_write_attribute($xml,'currency','GBP');
+		xmlwriter_text($xml,$params['amount']);
+		xmlwriter_end_element($xml);
+		xmlwriter_end_element($xml);
+		return xmlwriter_output_memory($xml,true);
 	}
 	
 	function setRequest($dataArray = array()) {

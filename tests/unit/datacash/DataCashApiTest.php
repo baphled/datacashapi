@@ -156,15 +156,56 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	}
 	
 	function testSetCardTxnDoesNotSupplyAnAuthCodeIfNonAreSupplied() {
-		
-	}
-	function testSetCardTxnReturnsStringIfParamsAreValid() {
 		$fixture = $this->_fixture->find('NoAuthCodeCardTxn');
-		print_r($fixture);
-		$this->assertContains('CardTxn',$this->_api->setCardTxn($fixture));
 		$this->assertNotContains('authcode',$this->_api->setCardTxn($fixture));
 	}
 	
+	function testSetCardTxnOnlySetsAuthcodeIfOneIsSupplied() {
+		$fixture = $this->_fixture->find('NoAuthCodeCardTxn');
+		$this->assertContains('CardTxn',$this->_api->setCardTxn($fixture));
+	}
+	
+	/**
+	 * We now need to focus on TxnDetails
+	 *
+	 */
+	function testSetTxnDetailsThrowsExceptionIfParamsNotSet() {
+		$this->setExpectedException('Zend_Exception');
+		$this->_api->setTxnDetails(array());
+	}
+	
+	function testSetTxnDetailsThrowsExceptionIfMerchantReferenceNotSupplied() {
+		$params = array();
+		$params['merchantreferenc'] = 'blah';
+		$params['amount'] = 100.00;
+		$this->setExpectedException('Zend_Exception');
+		$this->_api->setTxnDetails($params);
+	}
+	
+	function testSetTxnDetailsThrowsExceptionIfAmountNotSupplied() {
+		$params = array();
+		$params['merchantreference'] = 'blah';
+		$params['amoun'] = 100.00;
+		$this->setExpectedException('Zend_Exception');
+		$this->_api->setTxnDetails($params);
+	}
+	
+	function testSetTxnDetailsReturnsStringOnSuccess() {
+		$fixture = $this->_fixture->find('TxnDetailsNoCurrency');
+		$result = $this->_api->setTxnDetails($fixture);
+		$this->assertType('string',$result);
+		$this->assertContains('TxnDetails',$result);
+		$this->assertContains('merchantreference',$result);
+		$this->assertContains('amount',$result);
+		$this->assertContains('GBP',$result);
+	}
+	
+	function testSetTxnDetailsReturnsWhatWeExpect() {
+		$fixture = $this->_fixture->find('TxnDetailsNoCurrency');
+		$expected = $this->_xmlFixture->find('TxnDetails');
+		$result = $this->_api->setTxnDetails($fixture);
+		$this->assertEquals($expected[0],$result);
+	}
 	function testSetResponseThrowsExceptionIfParametersNotPassed() {
 		$this->setExpectedException('Zend_Exception');
 		$this->assertFalse($this->_api->setRequest());
