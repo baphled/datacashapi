@@ -200,12 +200,21 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 		$this->assertContains('GBP',$result);
 	}
 	
+	function testSetTxnDetailsOnlySetsGBPIfNoCurrencyIsSet() {
+		$fixture = $this->_fixture->find('TxnDetailsEUCurrency');
+		$expected = $this->_xmlFixture->find('txnDetailsWithEUR');
+		$result = $this->_api->setTxnDetails($fixture);
+		$this->assertContains('EUR',$result);
+		$this->assertEquals($expected[0],$result);
+	}
+	
 	function testSetTxnDetailsReturnsWhatWeExpect() {
 		$fixture = $this->_fixture->find('TxnDetailsNoCurrency');
 		$expected = $this->_xmlFixture->find('TxnDetails');
 		$result = $this->_api->setTxnDetails($fixture);
 		$this->assertEquals($expected[0],$result);
 	}
+	
 	function testSetResponseThrowsExceptionIfParametersNotPassed() {
 		$this->setExpectedException('Zend_Exception');
 		$this->assertFalse($this->_api->setRequest());

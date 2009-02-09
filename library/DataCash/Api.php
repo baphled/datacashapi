@@ -102,6 +102,12 @@ class DataCash_Api {
 		return xmlwriter_output_memory($xml, true);
 	}
 	
+	/**
+	 * Sets out TxnDetails
+	 *
+	 * @param Array	 	$params Parameterrs need to create element
+	 * @return String	$xml	Resulting TxnDetails element in XML format.
+	 */
 	function setTxnDetails($params = array()) {
 		if(empty($params)) {
 			throw new Zend_Exception('Parameters must be set');
@@ -114,7 +120,11 @@ class DataCash_Api {
 		
 		xmlwriter_write_element($xml,'merchantreference',$params['merchantreference']);
 		xmlwriter_start_element($xml,'amount');
-		xmlwriter_write_attribute($xml,'currency','GBP');
+		if(array_key_exists('currency',$params)) {
+			xmlwriter_write_attribute($xml,'currency',$params['currency']);
+		} else {
+			xmlwriter_write_attribute($xml,'currency','GBP');
+		}
 		xmlwriter_text($xml,$params['amount']);
 		xmlwriter_end_element($xml);
 		xmlwriter_end_element($xml);
