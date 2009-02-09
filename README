@@ -4,7 +4,7 @@ Used to interact with DataCash.
 
 As DataCash's current API does not conform to PHP5 standards & uses
 globals along with references, there is a need to create an API
-that can be used with ZendFramework and other frameworks.
+that can be used with ZendFramework.
 
 This API uses Zend_PHPUnit_Fixtures to help support the testing
 of this API, so PHP5, PHPUnit3.4 will be needed to use & test its
