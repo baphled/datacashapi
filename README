@@ -9,3 +9,6 @@ that can be used with ZendFramework.
 This API uses Zend_PHPUnit_Fixtures to help support the testing
 of this API, so PHP5, PHPUnit3.4 will be needed to use & test its
 functionality.
+
+For all tests to pass successful you will need to submit your DataCash
+credentials to the environments settings file.

@@ -81,7 +81,6 @@ class Zend_ConfigSettings {
     static function _setPath($path, $file) {
         $root = realpath(dirname(__FILE__) . $path); // smelly, could be anything
         $configPath = realpath($root . '/'.$file);
-        
         return $configPath;
     }
     
@@ -101,7 +100,7 @@ class Zend_ConfigSettings {
               
         if (!self::_hasEnvironment()) {
 	        $general = Zend_Registry::get('general');
-	        $file = (empty($file)) ? 'environments.ini' : $file;  
+	        $file = (('settings.ini' === $file) || empty($file)) ? 'environments.ini' : $file;  
 	        $configPath = self::_setPath($path, $file);
 	        self::_setRegistry($configPath, $general->environment);	        	        
         }
