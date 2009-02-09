@@ -52,6 +52,13 @@ class DataCash_Api {
 		return xmlwriter_output_memory($xml, true);
 	}
 	
+	/**
+	 * Gets our card information and turns the data into the 
+	 * needed XML element.
+	 *
+	 * @param 	Array 	$cardDataArray
+	 * @return 	String	XML element.
+	 */
 	function setCardData($cardDataArray = array()) {
 		if (empty($cardDataArray) ||
 			 !array_key_exists('pan',$cardDataArray) ||
@@ -67,6 +74,23 @@ class DataCash_Api {
 			xmlwriter_write_element($xml,'startdate',$cardDataArray['startdate']);
 			xmlwriter_write_element($xml,'issuenumber',$cardDataArray['issuenumber']);
 		}
+		xmlwriter_end_element($xml);
+
+		return xmlwriter_output_memory($xml, true);
+	}
+	
+	function setCardTxn($params = array()) {
+		$card = $this->setCardData($params);
+		if(!array_key_exists('method',$params)) {
+			throw new Zend_Exception('Must supply a transaction method');
+		}
+		$xml = xmlwriter_open_memory();
+		xmlwriter_start_element($xml, 'CardTxn');
+		xmlwriter_write_raw($xml,$card);
+		if(array_key_exists('auth',$params)) {
+			xmlwriter_write_element($xml,'auth', $params['auth']);
+		}
+		xmlwriter_write_element($xml,'method', $params['method']);
 		xmlwriter_end_element($xml);
 
 		return xmlwriter_output_memory($xml, true);

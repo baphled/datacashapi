@@ -139,9 +139,30 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 		
 	}
 	
+	function testCardTxnThrowsExceptionIfParamsEmpty() {
+		$this->setExpectedException('Zend_Exception');
+		$this->assertFalse($this->_api->setCardTxn(array()));
+	}
+	
 	function testSetResponseThrowsExceptionIfParametersArrayIsEmpty() {
 		$this->setExpectedException('Zend_Exception');
 		$this->_api->setRequest(array());
+	}
+	
+	function testSetCardTxnThrowsExceptionIfMethodIsNotAValueInParams() {
+		$this->setExpectedException('Zend_Exception');
+		$fixture = $this->_fixture->find('NoMethodCardTxn');
+		$this->assertContains('CardTxn',$this->_api->setCardTxn($fixture));
+	}
+	
+	function testSetCardTxnDoesNotSupplyAnAuthCodeIfNonAreSupplied() {
+		
+	}
+	function testSetCardTxnReturnsStringIfParamsAreValid() {
+		$fixture = $this->_fixture->find('NoAuthCodeCardTxn');
+		print_r($fixture);
+		$this->assertContains('CardTxn',$this->_api->setCardTxn($fixture));
+		$this->assertNotContains('authcode',$this->_api->setCardTxn($fixture));
 	}
 	
 	function testSetResponseThrowsExceptionIfParametersNotPassed() {
