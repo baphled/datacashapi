@@ -42,7 +42,7 @@ class DataCash_Api {
 	 * @param 	String 	$type	The type of request we are about to make.
 	 * @return 	String	$xml	Our resulting XML element
 	 */
-	function getAuth($type = 'deposit') {
+	function setAuth($type = 'deposit') {
 		$xml = xmlwriter_open_memory();
 		xmlwriter_start_element($xml, 'Authentication');
 		xmlwriter_write_element($xml, 'client', $this->_config->$type->client);
@@ -137,11 +137,11 @@ class DataCash_Api {
 	 * @param 	Array	 	$dataArray 	Our request array, holds all the relevant data to create the request XML
 	 * @return 	String		$xml		The XML request we want to send to DataCash
 	 */
-	function setRequest($dataArray = array()) {
+	function setRequest($dataArray = array(), $method='deposit') {
 		if(empty($dataArray)) {
 			throw new Zend_Exception('Parameters must be in array format.');
 		}
-		$auth = $this->getAuth();
+		$auth = $this->setAuth($method);
 		$cardTxn = $this->setCardTxn($dataArray);
 		$txnDetails = $this->setTxnDetails($dataArray);
 		$xml = xmlwriter_open_memory();

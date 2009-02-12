@@ -22,6 +22,7 @@ class DataCashXMLFixtures extends PHPUnit_Fixture {
            	array('ALIAS'=>'cardIssueNumAndStartDate', '<Card><pan>34342342424234</pan><expirydate>01/12</expirydate><startdate>02/10</startdate><issuenumber>01</issuenumber></Card>'),
            	array('ALIAS'=>'TxnDetails','<TxnDetails><merchantreference>1232452342441242</merchantreference><amount currency="GBP">100</amount></TxnDetails>'),
            	array('ALIAS'=>'txnDetailsWithEUR','<TxnDetails><merchantreference>1232452342441242</merchantreference><amount currency="EUR">100.23</amount></TxnDetails>'),
-           	array('ALIAS'=>'TransactionRequest','<Request><Authentication><client>clientNameDeposit</client><password>passwordDeposit</password></Authentication><Transaction><CardTxn><Card><pan>34342342424234</pan><expirydate>01/09</expirydate></Card><authcode>123123</authcode><method>auth</method></CardTxn><TxnDetails><merchantreference>1232452342441242</merchantreference><amount currency="EUR">100.23</amount></TxnDetails></Transaction></Request>')
+           	array('ALIAS'=>'DepositTransactionRequest','<Request><Authentication><client>clientNameDeposit</client><password>passwordDeposit</password></Authentication><Transaction><CardTxn><Card><pan>34342342424234</pan><expirydate>01/09</expirydate></Card><authcode>123123</authcode><method>auth</method></CardTxn><TxnDetails><merchantreference>1232452342441242</merchantreference><amount currency="EUR">100.23</amount></TxnDetails></Transaction></Request>'),
+           	array('ALIAS'=>'CancelTransaction','<Request><Authentication><client>97868768</client><password>blahblah</password></Authentication><Transaction><HistoricTxn><reference>7986687475798</reference><method>cancel</method></HistoricTxn></Transaction></Request>')
        );
 }

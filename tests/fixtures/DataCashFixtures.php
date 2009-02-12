@@ -26,6 +26,7 @@ class DataCashFixtures extends PHPUnit_Fixture {
            array('ALIAS' =>'NoMethodCardTxn', 'pan'=>34342342424234,'expirydate'=>'01/12','startdate'=>'02/10','issuenumber'=>'01','authcode'=>123123),
            array('ALIAS' =>'TxnDetailsNoCurrency', 'merchantreference'=>'1232452342441242','amount'=>100.00),
            array('ALIAS' =>'TxnDetailsEUCurrency', 'merchantreference'=>'1232452342441242','amount'=>100.23,'currency'=>'EUR'),
-           array('ALIAS' => 'CompleteRequest','pan'=>34342342424234,'expirydate'=>'01/09','authcode'=>123123,'method'=>'auth','merchantreference'=>'1232452342441242','amount'=>100.23,'currency'=>'EUR')
+           array('ALIAS' => 'CompleteDepositRequest','pan'=>34342342424234,'expirydate'=>'01/09','authcode'=>123123,'method'=>'auth','merchantreference'=>'1232452342441242','amount'=>100.23,'currency'=>'EUR'),
+           array('ALIAS' => 'CompleteWithdrawalRequest','pan'=>34342342424234,'expirydate'=>'01/09','authcode'=>123123,'method'=>'refund','merchantreference'=>'1232452342441242','amount'=>100.23,'currency'=>'EUR')
        );
 }
