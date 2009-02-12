@@ -18,14 +18,10 @@ Zend_Loader::registerAutoload ();
 
 class DataCashFixtures extends PHPUnit_Fixture {
 	protected $_fixtures = array(
-           array('ALIAS'=>'validCard', 'pan'=>34342342424234,'expirydate'=>'01/09'),
-           array('ALIAS'=>'invalidCard', 'pa'=>34342342424234,'expirdate'=>'01/09'),
-           array('ALIAS'=>'withIssueNum', 'pan'=>34342342424234,'expirydate'=>'01/12','startdate'=>'02/10','issuenumber'=>'01'),
-           array('ALIAS' =>'validCardTxn', 'pan'=>34342342424234,'expirydate'=>'01/12','startdate'=>'02/10','issuenumber'=>'01','authcode'=>123123,'method'=>'auth'),
-           array('ALIAS' =>'NoAuthCodeCardTxn', 'pan'=>34342342424234,'expirydate'=>'01/12','method'=>'auth'),
-           array('ALIAS' =>'NoMethodCardTxn', 'pan'=>34342342424234,'expirydate'=>'01/12','startdate'=>'02/10','issuenumber'=>'01','authcode'=>123123),
-           array('ALIAS' =>'TxnDetailsNoCurrency', 'merchantreference'=>'1232452342441242','amount'=>100.00),
-           array('ALIAS' =>'TxnDetailsEUCurrency', 'merchantreference'=>'1232452342441242','amount'=>100.23,'currency'=>'EUR'),
+           array('ALIAS' => 'invalidCardRequestPanMispelt','pa'=>34342342424234,'expirydate'=>'01/09','authcode'=>123123,'method'=>'auth','merchantreference'=>'1232452342441242','amount'=>100.23,'currency'=>'EUR'),
+           array('ALIAS' => 'invalidCardRequestExpiryMispelt','pa'=>34342342424234,'expirydat'=>'01/09','authcode'=>123123,'method'=>'auth','merchantreference'=>'1232452342441242','amount'=>100.23,'currency'=>'EUR'),
+           array('ALIAS' =>'NoMethodRequest', 'pan'=>34342342424234,'expirydate'=>'01/12','startdate'=>'02/10','issuenumber'=>'01','authcode'=>123123,'merchantreference'=>'1232452342441242','amount'=>100.23,'currency'=>'EUR'),
+           array('ALIAS' =>'RequestWithIssueNumAndStartDate', 'pan'=>34342342424234,'expirydate'=>'01/12','startdate'=>'02/10','issuenumber'=>'01','authcode'=>123123,'method'=>'auth','merchantreference'=>'1232452342441242','amount'=>100.23,'currency'=>'EUR'),
            array('ALIAS' => 'CompleteDepositRequest','pan'=>34342342424234,'expirydate'=>'01/09','authcode'=>123123,'method'=>'auth','merchantreference'=>'1232452342441242','amount'=>100.23,'currency'=>'EUR'),
            array('ALIAS' => 'CompleteWithdrawalRequest','pan'=>34342342424234,'expirydate'=>'01/09','authcode'=>123123,'method'=>'refund','merchantreference'=>'1232452342441242','amount'=>100.23,'currency'=>'EUR')
        );

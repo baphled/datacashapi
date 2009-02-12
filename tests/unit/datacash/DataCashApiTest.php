@@ -90,136 +90,42 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 		$this->assertNotEquals(null,$config->withdrawal->password);
 	}
 	
-	function testDataCashApiCanSetupAuthenticationElementUsingGetAuth() {
-		$xmlDeposit = $this->_api->setAuth();
-		$xmlWithdrawal = $this->_api->setAuth('withdrawal');
-		$this->assertContains('Authentication',$xmlDeposit);
-		$this->assertContains('client',$xmlDeposit);
-		$this->assertContains('password',$xmlDeposit);
-		
-		$this->assertNotEquals($xmlDeposit,$xmlWithdrawal);
-		$this->assertContains('passwordDeposit', $xmlDeposit);
-		$this->assertContains('passwordWithdrawal', $xmlWithdrawal);
-	}
-	
-	/**
-	 * We now need to setup card elements and make sure that we can get the
-	 * expected format.
-	 *
-	 */
-	function testSetCardDataThrowsExceptionIfParamsArrayIsEmpty() {
-		$this->setExpectedException('Zend_Exception');
-		$this->_api->setCardData(array());
-	}
-	
-	function testSetCardDataParamsMustHaveKeysPanAndExpiryDateThrowsOtherwise() {
-		$this->setExpectedException('Zend_Exception');
-		$this->_api->setCardData($this->_fixture->find('invalidCard'));
-	}
-	
-	function testSetCardDataCanTakePanAndExpiryAsMandatory() {
-		$this->assertType('string',$this->_api->setCardData($this->_fixture->find('validCard')));
-	}
-	
-	/**
-	 * All card elements contain a pan & expiry element, so these should be part of the result
-	 * regardless of the card type.
-	 *
-	 */
-	function testSetCardDataReturnsCardElementOnSuccess() {
-		$fixture = $this->_fixture->find('validCard');
-		$expected = $this->_xmlFixture->find('cardPanAndStartDate');
-		$this->assertContains('Card',$this->_api->setCardData($fixture));
-		$this->assertEquals($expected[0],$this->_api->setCardData($fixture));
-	}
-	
-	function testSetCardDataPopulatesStartDateAndIssueNumberIfItPassedWithParam() {
-		$fixture = $this->_fixture->find('withIssueNum');
-		$expected = $this->_xmlFixture->find('cardIssueNumAndStartDate');
-		$this->assertEquals($expected[0],$this->_api->setCardData($fixture));
-		
-	}
-	
-	function testCardTxnThrowsExceptionIfParamsEmpty() {
-		$this->setExpectedException('Zend_Exception');
-		$this->assertFalse($this->_api->setCardTxn(array()));
-	}
-	
 	function testSetResponseThrowsExceptionIfParametersArrayIsEmpty() {
 		$this->setExpectedException('Zend_Exception');
 		$this->_api->setRequest(array());
-	}
-	
-	function testSetCardTxnThrowsExceptionIfMethodIsNotAValueInParams() {
-		$this->setExpectedException('Zend_Exception');
-		$fixture = $this->_fixture->find('NoMethodCardTxn');
-		$this->assertContains('CardTxn',$this->_api->setCardTxn($fixture));
-	}
-	
-	function testSetCardTxnDoesNotSupplyAnAuthCodeIfNonAreSupplied() {
-		$fixture = $this->_fixture->find('NoAuthCodeCardTxn');
-		$this->assertNotContains('authcode',$this->_api->setCardTxn($fixture));
-	}
-	
-	function testSetCardTxnOnlySetsAuthcodeIfOneIsSupplied() {
-		$fixture = $this->_fixture->find('NoAuthCodeCardTxn');
-		$this->assertContains('CardTxn',$this->_api->setCardTxn($fixture));
-	}
-	
-	/**
-	 * We now need to focus on TxnDetails
-	 *
-	 */
-	function testSetTxnDetailsThrowsExceptionIfParamsNotSet() {
-		$this->setExpectedException('Zend_Exception');
-		$this->_api->setTxnDetails(array());
-	}
-	
-	function testSetTxnDetailsThrowsExceptionIfMerchantReferenceNotSupplied() {
-		$params = array();
-		$params['merchantreferenc'] = 'blah';
-		$params['amount'] = 100.00;
-		$this->setExpectedException('Zend_Exception');
-		$this->_api->setTxnDetails($params);
-	}
-	
-	function testSetTxnDetailsThrowsExceptionIfAmountNotSupplied() {
-		$params = array();
-		$params['merchantreference'] = 'blah';
-		$params['amoun'] = 100.00;
-		$this->setExpectedException('Zend_Exception');
-		$this->_api->setTxnDetails($params);
-	}
-	
-	function testSetTxnDetailsReturnsStringOnSuccess() {
-		$fixture = $this->_fixture->find('TxnDetailsNoCurrency');
-		$result = $this->_api->setTxnDetails($fixture);
-		$this->assertType('string',$result);
-		$this->assertContains('TxnDetails',$result);
-		$this->assertContains('merchantreference',$result);
-		$this->assertContains('amount',$result);
-		$this->assertContains('GBP',$result);
-	}
-	
-	function testSetTxnDetailsOnlySetsGBPIfNoCurrencyIsSet() {
-		$fixture = $this->_fixture->find('TxnDetailsEUCurrency');
-		$expected = $this->_xmlFixture->find('txnDetailsWithEUR');
-		$result = $this->_api->setTxnDetails($fixture);
-		$this->assertContains('EUR',$result);
-		$this->assertEquals($expected[0],$result);
-	}
-	
-	function testSetTxnDetailsReturnsWhatWeExpect() {
-		$fixture = $this->_fixture->find('TxnDetailsNoCurrency');
-		$expected = $this->_xmlFixture->find('TxnDetails');
-		$result = $this->_api->setTxnDetails($fixture);
-		$this->assertEquals($expected[0],$result);
 	}
 	
 	function testSetRequestThrowsExceptionIfParametersNotPassed() {
 		$this->setExpectedException('Zend_Exception');
 		$this->_api->setRequest();
 	}
+	
+	function testSetResponsesThrowsExceptionIfPanArrayDoesntExist() {
+		$fixture = $this->_fixture->find('invalidCardRequestPanMispelt');
+		$this->setExpectedException('Zend_Exception');
+		$this->_api->setRequest($fixture);
+	}
+	
+
+	function testSetResponsesThrowsExceptionIfExpiryDateArrayDoesntExist() {
+		$fixture = $this->_fixture->find('invalidCardRequestExpiryMispelt');
+		$this->setExpectedException('Zend_Exception');
+		$this->_api->setRequest($fixture);
+	}
+	
+function testSetResponsesThrowsExceptionIfNoMethod() {
+		$fixture = $this->_fixture->find('NoMethodRequest');
+		$this->setExpectedException('Zend_Exception');
+		$this->_api->setRequest($fixture);
+	}
+	
+	function testSetResponsesGensIssueNumAndStartDateIfSupplied() {
+		$fixture = $this->_fixture->find('RequestWithIssueNumAndStartDate');
+		$result = $this->_api->setRequest($fixture);
+		$this->assertContains('startdate',$result);
+		$this->assertContains('issuenumber',$result);
+	}
+	
 	function testSetRequestReturnsString() {
 		$fixture = $this->_fixture->find('CompleteDepositRequest');
 		$expected = $this->_xmlFixture->find('DepositTransactionRequest');

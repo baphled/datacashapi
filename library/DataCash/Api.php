@@ -42,7 +42,7 @@ class DataCash_Api {
 	 * @param 	String 	$type	The type of request we are about to make.
 	 * @return 	String	$xml	Our resulting XML element
 	 */
-	function setAuth($type = 'deposit') {
+	private function _setAuth($type = 'deposit') {
 		$xml = xmlwriter_open_memory();
 		xmlwriter_start_element($xml, 'Authentication');
 		xmlwriter_write_element($xml, 'client', $this->_config->$type->client);
@@ -59,7 +59,7 @@ class DataCash_Api {
 	 * @param 	Array 	$cardDataArray
 	 * @return 	String	XML element.
 	 */
-	function setCardData($cardDataArray = array()) {
+	private function _setCardData($cardDataArray = array()) {
 		if (empty($cardDataArray) ||
 			 !array_key_exists('pan',$cardDataArray) ||
 			 !array_key_exists('expirydate',$cardDataArray)) {
@@ -85,8 +85,8 @@ class DataCash_Api {
 	 * @param 	Array 	$params	Array storing data needed to make transaction.
 	 * @return 	String	$xml	Our CardTxn XML element.
 	 */
-	function setCardTxn($params = array()) {
-		$card = $this->setCardData($params);
+	private function _setCardTxn($params = array()) {
+		$card = $this->_setCardData($params);
 		if(!array_key_exists('method',$params)) {
 			throw new Zend_Exception('Must supply a transaction method');
 		}
@@ -108,7 +108,7 @@ class DataCash_Api {
 	 * @param Array	 	$params Parameterrs need to create element
 	 * @return String	$xml	Resulting TxnDetails element in XML format.
 	 */
-	function setTxnDetails($params = array()) {
+	private function _setTxnDetails($params = array()) {
 		if(empty($params)) {
 			throw new Zend_Exception('Parameters must be set');
 		}
@@ -141,9 +141,9 @@ class DataCash_Api {
 		if(empty($dataArray)) {
 			throw new Zend_Exception('Parameters must be in array format.');
 		}
-		$auth = $this->setAuth($method);
-		$cardTxn = $this->setCardTxn($dataArray);
-		$txnDetails = $this->setTxnDetails($dataArray);
+		$auth = $this->_setAuth($method);
+		$cardTxn = $this->_setCardTxn($dataArray);
+		$txnDetails = $this->_setTxnDetails($dataArray);
 		$xml = xmlwriter_open_memory();
 		xmlwriter_start_element($xml,'Request');
 		xmlwriter_write_raw($xml,$auth);
