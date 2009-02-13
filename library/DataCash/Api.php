@@ -142,8 +142,14 @@ class DataCash_Api {
 			throw new Zend_Exception('Parameters must be in array format.');
 		}
 		$auth = $this->_setAuth($method);
-		$cardTxn = $this->_setCardTxn($dataArray);
-		$txnDetails = $this->_setTxnDetails($dataArray);
+		if(!array_key_exists('Card',$dataArray)) {
+			throw new Zend_Exception('Must have card details.');
+		}
+		$cardTxn = $this->_setCardTxn($dataArray['Card']);
+		if(!array_key_exists('Transaction',$dataArray)) {
+			throw new Zend_Exception('Must have transaction details.');
+		}
+		$txnDetails = $this->_setTxnDetails($dataArray['Transaction']);
 		$xml = xmlwriter_open_memory();
 		xmlwriter_start_element($xml,'Request');
 		xmlwriter_write_raw($xml,$auth);

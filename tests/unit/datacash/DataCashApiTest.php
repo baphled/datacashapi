@@ -116,7 +116,7 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 function testSetResponsesThrowsExceptionIfNoMethod() {
 		$fixture = $this->_fixture->find('NoMethodRequest');
 		$this->setExpectedException('Zend_Exception');
-		$this->_api->setRequest($fixture);
+		print_r($this->_api->setRequest($fixture));
 	}
 	
 	function testSetResponsesGensIssueNumAndStartDateIfSupplied() {
