@@ -59,7 +59,12 @@ class DataCash_Api {
 	 * @param 	Array 	$cardDataArray
 	 * @return 	String	XML element.
 	 */
-	private function _setCardData($cardDataArray = array()) {
+	private function _setCardData($params = array()) {
+		
+		If(!array_key_exists('Card',$params)) {
+			throw new Zend_Exception('No card data.');
+		}
+		$cardDataArray = $params['Card'];
 		if (empty($cardDataArray) ||
 			 !array_key_exists('pan',$cardDataArray) ||
 			 !array_key_exists('expirydate',$cardDataArray)) {
@@ -74,6 +79,10 @@ class DataCash_Api {
 			xmlwriter_write_element($xml,'startdate',$cardDataArray['startdate']);
 			xmlwriter_write_element($xml,'issuenumber',$cardDataArray['issuenumber']);
 		}
+		if(!array_key_exists('CV2Avs',$params)) {
+			throw new Zend_Exception('No datacash cv2avs settings, please resolve.');
+		} 
+		xmlwriter_write_raw($xml,$this->_cv2avsCheck($params));
 		xmlwriter_end_element($xml);
 
 		return xmlwriter_output_memory($xml, true);
@@ -86,16 +95,16 @@ class DataCash_Api {
 	 * @return string	$xml or false if not doing cv2 checks.
 	 * 
 	 */
-	function _cv2avsCheck($params) {
-		if(!isset($this->_config->cv2avs->check)) {
+	function _cv2avsCheck($params = array()) {
+		if(empty($params) || !isset($this->_config->cv2avs->check)) {
 			throw new Zend_Exception('No datacash cv2avs settings, please resolve.');
 		} 
 		if(true === $this->_config->cv2avs->check && !array_key_exists('CV2Avs', $params)) {
 			throw new Zend_Exception('CV2 data not present');
 		} else {
-			print_r($params);
+			return $this->_setCV2Address($params['CV2Avs']);
 		}
-		return '';
+		return false;
 	}
 	
 	/**
@@ -105,7 +114,10 @@ class DataCash_Api {
 	 * @return string	$xml	Our resulting request body for Cv2Avs element.
 	 * 
 	 */
-	function _setCV2Address($params) {
+	private function _setCV2Address($params) {
+		if(empty($params)) {
+			throw new Zend_Exception('no Address details.');
+		}
 		$xml = xmlwriter_open_memory();
 		xmlwriter_start_element($xml,'CV2Avs');
 		if(array_key_exists('street_address1',$params)) {
@@ -140,17 +152,18 @@ class DataCash_Api {
 	 * @return 	String	$xml	Our CardTxn XML element.
 	 */
 	private function _setCardTxn($params = array()) {
+		$cardInfo = $params['Card'];
 		$card = $this->_setCardData($params);
-		if(!array_key_exists('method',$params)) {
+		if(!array_key_exists('method',$cardInfo)) {
 			throw new Zend_Exception('Must supply a transaction method');
 		}
 		$xml = xmlwriter_open_memory();
 		xmlwriter_start_element($xml, 'CardTxn');
 		xmlwriter_write_raw($xml,$card);
-		if(array_key_exists('authcode',$params)) {
-			xmlwriter_write_element($xml,'authcode', $params['authcode']);
+		if(array_key_exists('authcode',$cardInfo)) {
+			xmlwriter_write_element($xml,'authcode', $cardInfo['authcode']);
 		}
-		xmlwriter_write_element($xml,'method', $params['method']);
+		xmlwriter_write_element($xml,'method', $cardInfo['method']);
 		xmlwriter_end_element($xml);
 
 		return xmlwriter_output_memory($xml, true);
@@ -199,7 +212,7 @@ class DataCash_Api {
 		if(!array_key_exists('Card',$dataArray)) {
 			throw new Zend_Exception('Must have card details.');
 		}
-		$cardTxn = $this->_setCardTxn($dataArray['Card']);
+		$cardTxn = $this->_setCardTxn($dataArray);
 		if(!array_key_exists('Transaction',$dataArray)) {
 			throw new Zend_Exception('Must have transaction details.');
 		}
