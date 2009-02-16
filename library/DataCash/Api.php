@@ -79,6 +79,13 @@ class DataCash_Api {
 		return xmlwriter_output_memory($xml, true);
 	}
 	
+	function _av2cvsCheck() {
+		if(!isset($this->_config->cv2avs->check)) {
+			throw new Zend_Exception('No datacash cv2avs settings, please resolve.');
+		}
+		return false;
+	}
+	
 	/**
 	 * Sets out CardTxn element and returns the response.
 	 *

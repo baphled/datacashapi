@@ -6,6 +6,13 @@ class DataCashApiWrapper extends DataCash_Api  {
 		return $this->_config;
 	}
 }
+
+class DatacashApiConfigWrapper extends DataCash_Api {
+	function __construct() {
+		$this->_config->datacash = null;
+	}
+}
+
 /**
  * DataCashApi Testcase.
  * @author Yomi (baphled) Colledge <yomi@boodah.net> 2009
@@ -21,6 +28,7 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	private $_xmlFixture;
 	private $_api;
 	private $_apiWrapper;
+	private $_apiConfigWrapper;
 	
 	
 	function setUp() {
@@ -28,6 +36,7 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 		$this->_xmlFixture = new DataCashXMLFixtures();
 		$this->_api = new DataCash_Api();
 		$this->_apiWrapper = new DataCashApiWrapper();
+		$this->_apiConfigWrapper = new DatacashApiConfigWrapper();
 	}
 	
 	function tearDown() {
@@ -138,5 +147,23 @@ function testSetResponsesThrowsExceptionIfNoMethod() {
 		$fixture = $this->_fixture->find('CompleteWithdrawalRequest');
 		$result = $this->_api->setRequest($fixture,'withdrawal');
 		$this->assertContains('passwordWithdrawal', $result);
+	}
+	
+	/**
+	 * CV2Avs checks will be executed if the settings require it
+	 * if this the the case the results will be placed inside
+	 * the Card element of our DataCash requests.
+	 *
+	 */
+	function testSetCV2AvsReturnsFalseByDefault() {
+		$fixture = $this->_fixture->find('TestCV2AvsRequest');
+		$result = $this->_api->_av2cvsCheck($fixture);
+		$this->assertFalse($result);
+	}
+	// We need to add CV2Avs checks to our requests
+	function testSetCV2AvsThrowsExceptionIfConfigSettingsNotPresent() {
+		$this->setExpectedException('Zend_Exception');
+		$fixture = $this->_fixture->find('TestCV2AvsRequest');
+		$this->_apiConfigWrapper->_av2cvsCheck($fixture);
 	}
 }
