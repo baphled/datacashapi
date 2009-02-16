@@ -123,10 +123,10 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 		$this->_api->setRequest($fixture);
 	}
 	
-function testSetResponsesThrowsExceptionIfNoMethod() {
+	function testSetResponsesThrowsExceptionIfNoMethod() {
 		$fixture = $this->_fixture->find('NoMethodRequest');
 		$this->setExpectedException('Zend_Exception');
-		print_r($this->_api->setRequest($fixture));
+		$this->_api->setRequest($fixture);
 	}
 	
 	function testSetResponsesGensIssueNumAndStartDateIfSupplied() {
@@ -156,10 +156,10 @@ function testSetResponsesThrowsExceptionIfNoMethod() {
 	 * the Card element of our DataCash requests.
 	 *
 	 */
-	function testSetCV2AvsCheckReturnsFalseByDefault() {
+	function testSetCV2AvsCheckReturnsStringByDefault() {
 		$fixture = $this->_fixture->find('TestCV2AvsRequest');
 		$result = $this->_api->_cv2avsCheck($fixture);
-		$this->assertFalse($result);
+		$this->assertType('string',$result);
 	}
 	// We need to add CV2Avs checks to our requests
 	function testCV2AvsCheckThrowsExceptionIfConfigSettingsNotPresent() {
@@ -176,7 +176,7 @@ function testSetResponsesThrowsExceptionIfNoMethod() {
 	function testCV2AvsCheckThrowsExceptionIfNoCv2DataIsPassed() {
 		$this->setExpectedException('Zend_Exception');
 		$fixture = $this->_fixture->find('CompleteDepositRequest');
-		$this->_api->_cv2avsCheck($fixture);
+		$this->_apiConfigWrapper->_cv2avsCheck($fixture);
 	}
 	
 	/**
@@ -209,7 +209,6 @@ function testSetResponsesThrowsExceptionIfNoMethod() {
 		$this->assertNotContains('street_address2',$result);
 		$this->assertNotContains('street_address3',$result);
 		$this->assertContains('postcode',$result);
-		print_r($result);
 	}
 	
 	function testSetCv2AddressThrowsExceptionIfStreetAdress1KeyIsNotPresentOrSmispelt() {
@@ -217,4 +216,9 @@ function testSetResponsesThrowsExceptionIfNoMethod() {
 		$fixture = $this->_fixture->find('TestCV2AvsNoStreetAddress1Request');
 		$this->_api->_setCV2Address($fixture['CV2Avs']);
 	}
+	
+	/**
+	 * We'll need to refactor _setCV2Address so that it is call within CV2AvsCheck
+	 */
+	
 }

@@ -79,18 +79,32 @@ class DataCash_Api {
 		return xmlwriter_output_memory($xml, true);
 	}
 	
+	/**
+	 * Checks to determine whther we need to do a Cv2Av2 check.
+	 *
+	 * @param unknown_type $params
+	 * @return string	$xml or false if not doing cv2 checks.
+	 * 
+	 */
 	function _cv2avsCheck($params) {
 		if(!isset($this->_config->cv2avs->check)) {
 			throw new Zend_Exception('No datacash cv2avs settings, please resolve.');
+		} 
+		if(true === $this->_config->cv2avs->check && !array_key_exists('CV2Avs', $params)) {
+			throw new Zend_Exception('CV2 data not present');
+		} else {
+			print_r($params);
 		}
-		
-		if(true === $this->_config->cv2avs->check || 
-			!array_key_exists('CV2Avs',$params)) {
-				throw new Zend_Exception('CV2 data not present');
-		}
-		return false;
+		return '';
 	}
 	
+	/**
+	 * Sets our CV2Avs check inforamtion ready to send off to DataCash
+	 *
+	 * @param array $params
+	 * @return string	$xml	Our resulting request body for Cv2Avs element.
+	 * 
+	 */
 	function _setCV2Address($params) {
 		$xml = xmlwriter_open_memory();
 		xmlwriter_start_element($xml,'CV2Avs');
@@ -112,12 +126,13 @@ class DataCash_Api {
 		if(array_key_exists('postcode',$params)) {
 			xmlwriter_write_element($xml,'postcode',$params['postcode']);
 		}
-	if(array_key_exists('cv2',$params)) {
+		if(array_key_exists('cv2',$params)) {
 			xmlwriter_write_element($xml,'cv2',$params['cv2']);
 		}
 		xmlwriter_end_element($xml);
 		return xmlwriter_output_memory($xml, true);
 	}
+	
 	/**
 	 * Sets out CardTxn element and returns the response.
 	 *
