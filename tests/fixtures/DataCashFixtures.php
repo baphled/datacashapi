@@ -35,6 +35,10 @@ class DataCashFixtures extends PHPUnit_Fixture {
            		'Transaction' =>array('merchantreference'=>'1232452342441242','amount'=>100.23,'currency'=>'EUR')),
            array('ALIAS' => 'CompleteWithdrawalRequest',
            		'Card' => array('pan'=>34342342424234,'expirydate'=>'01/09','authcode'=>123123,'method'=>'refund'),
-           		'Transaction' =>array('merchantreference'=>'1232452342441242','amount'=>100.23,'currency'=>'EUR'))
+           		'Transaction' =>array('merchantreference'=>'1232452342441242','amount'=>100.23,'currency'=>'EUR')),
+           array('ALIAS' => 'TestCV2AvsRequest',
+           		'Card' => array('pan'=>34342342424234,'expirydate'=>'01/09','authcode'=>123123,'method'=>'refund'),
+           		'Transaction' =>array('merchantreference'=>'1232452342441242','amount'=>100.23,'currency'=>'EUR'),
+           		'AV2Cvs' =>array('street_address1'=>'Flat 7','street_address2'=>'89 Jumble Street','address_address3'=>'MyTown'),'postcode'=>'AV12FR','cv2'=>'123')
        );
 }
