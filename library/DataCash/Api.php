@@ -79,9 +79,14 @@ class DataCash_Api {
 		return xmlwriter_output_memory($xml, true);
 	}
 	
-	function _av2cvsCheck() {
+	function _cv2avsCheck($params) {
 		if(!isset($this->_config->cv2avs->check)) {
 			throw new Zend_Exception('No datacash cv2avs settings, please resolve.');
+		}
+		
+		if(true === $this->_config->cv2avs->check || 
+			!array_key_exists('CV2Avs',$params)) {
+				throw new Zend_Exception('CV2 data not present');
 		}
 		return false;
 	}
