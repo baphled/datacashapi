@@ -44,6 +44,7 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 		unset($this->_fixture);
 		unset($this->_api);
 		unset($this->_apiWrapper);
+		unset($this->_apiConfigWrapper);
 	}
 	/**
 	 * We want to check that we get the expected structure from
@@ -155,15 +156,65 @@ function testSetResponsesThrowsExceptionIfNoMethod() {
 	 * the Card element of our DataCash requests.
 	 *
 	 */
-	function testSetCV2AvsReturnsFalseByDefault() {
+	function testSetCV2AvsCheckReturnsFalseByDefault() {
 		$fixture = $this->_fixture->find('TestCV2AvsRequest');
-		$result = $this->_api->_av2cvsCheck($fixture);
+		$result = $this->_api->_cv2avsCheck($fixture);
 		$this->assertFalse($result);
 	}
 	// We need to add CV2Avs checks to our requests
-	function testSetCV2AvsThrowsExceptionIfConfigSettingsNotPresent() {
+	function testCV2AvsCheckThrowsExceptionIfConfigSettingsNotPresent() {
 		$this->setExpectedException('Zend_Exception');
 		$fixture = $this->_fixture->find('TestCV2AvsRequest');
-		$this->_apiConfigWrapper->_av2cvsCheck($fixture);
+		$this->_apiConfigWrapper->_cv2avsCheck($fixture);
+	}
+	
+	/**
+	 * We'll use a fixture that doesn't have a AV2Cvs array element,
+	 * we'll then make sure we have each mandatory field.
+	 *
+	 */
+	function testCV2AvsCheckThrowsExceptionIfNoCv2DataIsPassed() {
+		$this->setExpectedException('Zend_Exception');
+		$fixture = $this->_fixture->find('CompleteDepositRequest');
+		$this->_api->_cv2avsCheck($fixture);
+	}
+	
+	/**
+	 * We need to setup the statement address which consists of a 
+	 * max of for street_address fields & a postcode.
+	 * 
+	 * The documentation says that these are all conditional so
+	 * we shouldn't throw any exceptions if the data is empty.
+	 */
+	function testSetCv2AddressResultIsNotNull() {
+		$fixture = $this->_fixture->find('TestCV2AvsSingleStreetAddressRequest');
+		$result = $this->_api->_setCV2Address($fixture['CV2Avs']);
+		$this->assertNotNull($result);
+		$this->assertContains('CV2Avs',$result);
+		$this->assertContains('street_address1',$result);
+	}
+	
+	function testSetCv2DoesnotSetAddress2IfItIsNotSet() {
+		$fixture = $this->_fixture->find('TestCV2AvsNoStreetAddress2or3Request');
+		$result = $this->_api->_setCV2Address($fixture['CV2Avs']);
+		$this->assertNotNull($result);
+		$this->assertNotContains('street_address2',$result);
+		$this->assertNotContains('street_address3',$result);
+	}
+	
+	function testSetCv2DoesNotHaveAddress() {
+		$fixture = $this->_fixture->find('TestCV2AvsNoAddressRequest');
+		$result = $this->_api->_setCV2Address($fixture['CV2Avs']);
+		$this->assertNotNull($result);
+		$this->assertNotContains('street_address2',$result);
+		$this->assertNotContains('street_address3',$result);
+		$this->assertContains('postcode',$result);
+		print_r($result);
+	}
+	
+	function testSetCv2AddressThrowsExceptionIfStreetAdress1KeyIsNotPresentOrSmispelt() {
+		$this->setExpectedException('Zend_Exception');
+		$fixture = $this->_fixture->find('TestCV2AvsNoStreetAddress1Request');
+		$this->_api->_setCV2Address($fixture['CV2Avs']);
 	}
 }

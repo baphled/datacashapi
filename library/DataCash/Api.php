@@ -91,6 +91,33 @@ class DataCash_Api {
 		return false;
 	}
 	
+	function _setCV2Address($params) {
+		$xml = xmlwriter_open_memory();
+		xmlwriter_start_element($xml,'CV2Avs');
+		if(array_key_exists('street_address1',$params)) {
+			xmlwriter_write_element($xml,'street_address1',$params['street_address1']);
+		}
+		if(array_key_exists('street_address2',$params) && !array_key_exists('street_address1',$params)) {
+			throw new Zend_Exception('street_address1 not set');
+		} elseif(array_key_exists('street_address2',$params)) {
+			xmlwriter_write_element($xml,'street_address2',$params['street_address2']);
+		}
+		if(array_key_exists('street_address3',$params)  && 
+				(!array_key_exists('street_address2',$params) || 
+				!array_key_exists('street_address1',$params))) {
+			throw new Zend_Exception('street_address1 or street_address2 not set');
+		} elseif(array_key_exists('street_address3',$params)) {
+			xmlwriter_write_element($xml,'street_address3',$params['street_address3']);
+		}
+		if(array_key_exists('postcode',$params)) {
+			xmlwriter_write_element($xml,'postcode',$params['postcode']);
+		}
+	if(array_key_exists('cv2',$params)) {
+			xmlwriter_write_element($xml,'cv2',$params['cv2']);
+		}
+		xmlwriter_end_element($xml);
+		return xmlwriter_output_memory($xml, true);
+	}
 	/**
 	 * Sets out CardTxn element and returns the response.
 	 *
