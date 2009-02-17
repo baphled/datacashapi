@@ -177,7 +177,7 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	function testCV2AvsCheckThrowsExceptionIfNoCv2DataIsPassed() {
 		$this->setExpectedException('Zend_Exception');
 		$fixture = $this->_fixture->find('CompleteDepositRequest');
-		$this->_apiConfigWrapper->_cv2avsCheck($fixture);
+		$this->_apiConfigWrapper->setRequest($fixture);
 	}
 	
 	/**
@@ -189,7 +189,7 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testSetCv2AddressResultIsNotNull() {
 		$fixture = $this->_fixture->find('TestCV2AvsSingleStreetAddressRequest');
-		$result = $this->_api->_cv2avsCheck($fixture);
+		$result = $this->_api->setRequest($fixture);
 		$this->assertNotNull($result);
 		$this->assertContains('CV2Avs',$result);
 		$this->assertContains('street_address1',$result);
@@ -197,7 +197,7 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	
 	function testSetCv2DoesnotSetAddress2IfItIsNotSet() {
 		$fixture = $this->_fixture->find('TestCV2AvsNoStreetAddress2or3Request');
-		$result = $this->_api->_cv2avsCheck($fixture);
+		$result = $this->_api->setRequest($fixture);
 		$this->assertNotNull($result);
 		$this->assertNotContains('street_address2',$result);
 		$this->assertNotContains('street_address3',$result);
@@ -205,7 +205,7 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	
 	function testSetCv2DoesNotHaveAddress() {
 		$fixture = $this->_fixture->find('TestCV2AvsNoAddressRequest');
-		$result = $this->_api->_cv2avsCheck($fixture);
+		$result = $this->_api->setRequest($fixture);
 		$this->assertNotNull($result);
 		$this->assertNotContains('street_address2',$result);
 		$this->assertNotContains('street_address3',$result);
@@ -215,7 +215,7 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	function testSetCv2AddressThrowsExceptionIfStreetAdress1KeyIsNotPresentOrSmispelt() {
 		$this->setExpectedException('Zend_Exception');
 		$fixture = $this->_fixture->find('TestCV2AvsNoStreetAddress1Request');
-		$this->_api->_cv2avsCheck($fixture);
+		$this->_api->setRequest($fixture);
 	}
 	
 	/**
