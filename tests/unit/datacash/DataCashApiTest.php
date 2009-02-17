@@ -7,12 +7,25 @@ class DataCashApiWrapper extends DataCash_Api  {
 	}
 }
 
-class DatacashApiConfigWrapper extends DataCash_Api {
+class FakeConfig {
 	function __construct() {
-		$this->_config->datacash = null;
+		$this->_config = new stdClass();
+		$this->_config->extendedPolicy =  null;
+	}
+}
+class DatacashApiExtendedPolicyWrapper extends DataCash_Api {
+	function __construct() {
+		$this->_config = new FakeConfig();
+		$this->_config->extendedPolicy->set = true;
 	}
 }
 
+class DatacashApiConfigWrapper extends DataCash_Api {
+	function __construct() {
+		$this->_config = new FakeConfig();
+		$this->_config->extendedPolicy->set = false;
+	}
+}
 /**
  * DataCashApi Testcase.
  * @author Yomi (baphled) Colledge <yomi@boodah.net> 2009
@@ -29,6 +42,7 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	private $_api;
 	private $_apiWrapper;
 	private $_apiConfigWrapper;
+	private $_apiExtendedPolicy;
 	
 	
 	function setUp() {
@@ -37,6 +51,7 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 		$this->_api = new DataCash_Api();
 		$this->_apiWrapper = new DataCashApiWrapper();
 		$this->_apiConfigWrapper = new DatacashApiConfigWrapper();
+		$this->_apiExtendedPolicy = new DatacashApiExtendedPolicyWrapper();
 	}
 	
 	function tearDown() {
@@ -45,7 +60,9 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 		unset($this->_api);
 		unset($this->_apiWrapper);
 		unset($this->_apiConfigWrapper);
+		unset($this->_apiExtendedPolicy);
 	}
+	
 	/**
 	 * We want to check that we get the expected structure from
 	 * xmlwriter & an idea of how it works, once we have this
@@ -218,8 +235,23 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 		$this->_api->setRequest($fixture);
 	}
 	
-	/**
-	 * We'll need to refactor _setCV2Address so that it is call within CV2AvsCheck
-	 */
+	function testSetRequestIfExtendedPolicyConfigIsSetButNotFound() {
+		$this->setExpectedException('Zend_Exception');
+		$fixture = $this->_fixture->find('TestCV2AvsNoStreetAddress2or3Request');
+		$this->_apiConfigWrapper->setRequest($fixture);
+	}
+	
+	function testSetRequestIfExtendedPolicyConfigIsSetToFalseReturnFalse() {
+		$this->assertFalse($this->_apiConfigWrapper->_extendedPolicyCheck());
+	}
+	
+	function testvVlidatePolicyThrowsExceptionIfExtendedPolicySetButNoCV2PolicyPresent() {
+		$this->setExpectedException('Zend_Exception');
+		$this->_apiExtendedPolicy->_extendedPolicyCheck();
+	}
+	
+	function testValidatePolicyThrowsExceptionIfExtendedPolicysetButNoPostCodePolicyPresent() {
+		$this->assertEquals(1,$this->_api->_extendedPolicyCheck());
+	}
 	
 }
