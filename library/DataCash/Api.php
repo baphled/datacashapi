@@ -169,29 +169,40 @@ class DataCash_Api {
 		return xmlwriter_output_memory($xml, true);
 	}
 	
-	function _extendedPolicyCheck() {
+	/**
+	 * Checks our policy
+	 *
+	 * @param string $policy
+	 * @return bool
+	 */
+	function _getPolicy($policy = '') {
+		if(empty($policy)) {
+			throw new Zend_exception('Policy must be valid');
+		}
 		if (false !== $this->_config->extendedPolicy->set && 
-			(!isset($this->_config->extendedPolicy->cv2_policy->notprovided) ||
-			 !isset($this->_config->extendedPolicy->cv2_policy->notchecked) ||
-			 !isset($this->_config->extendedPolicy->cv2_policy->mathed) ||
-			 !isset($this->_config->extendedPolicy->cv2_policy->notmatched) ||
-			 !isset($this->_config->extendedPolicy->cv2_policy->partialmatch))) {
+			(!isset($this->_config->extendedPolicy->$policy->notprovided) ||
+			 !isset($this->_config->extendedPolicy->$policy->notchecked) ||
+			 !isset($this->_config->extendedPolicy->$policy->mathed) ||
+			 !isset($this->_config->extendedPolicy->$policy->notmatched) ||
+			 !isset($this->_config->extendedPolicy->$policy->partialmatch))) {
+			return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * Checxks that we have all the needed extended policy data, throws exception if something goes wrong.
+	 *
+	 * @return bool
+	 */
+	function _extendedPolicyCheck() {
+		if (false === $this->_getPolicy('cv2_policy')) {
 			throw new Zend_Exception('Extended policy set, all cv2 policy settings should be accessible.');
 		}
-		if (false !== $this->_config->extendedPolicy->set && 
-			(!isset($this->_config->extendedPolicy->postcode_policy->notprovided) ||
-			 !isset($this->_config->extendedPolicy->postcode_policy->notchecked) ||
-			 !isset($this->_config->extendedPolicy->postcode_policy->mathed) ||
-			 !isset($this->_config->extendedPolicy->postcode_policy->notmatched) ||
-			 !isset($this->_config->extendedPolicy->postcode_policy->partialmatch))) {
+		if (false === $this->_getPolicy('postcode_policy')) {
 			throw new Zend_Exception('Extended policy set, all policy postcode policy settings should be accessible.');
 		}
-	if (false !== $this->_config->extendedPolicy->set && 
-			(!isset($this->_config->extendedPolicy->address_policy->notprovided) ||
-			 !isset($this->_config->extendedPolicy->address_policy->notchecked) ||
-			 !isset($this->_config->extendedPolicy->address_policy->mathed) ||
-			 !isset($this->_config->extendedPolicy->address_policy->notmatched) ||
-			 !isset($this->_config->extendedPolicy->address_policy->partialmatch))) {
+		if (false === $this->_getPolicy('address_policy')) {
 			throw new Zend_Exception('Extended policy set, all policy address policy settings should be accessible.');
 		}
 		return $this->_config->extendedPolicy->set;
