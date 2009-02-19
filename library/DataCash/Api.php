@@ -292,7 +292,7 @@ class DataCash_Api {
 		return xmlwriter_output_memory($xml,true);
 	}
 	
-	function _threeDSecure() {
+	private function _threeDSecure() {
 		if(!isset($this->_config->threeDSecure->verify)) {
 			throw new Zend_Exception('Need to set 3dSecure property.');
 		}
@@ -337,13 +337,13 @@ class DataCash_Api {
 			throw new Zend_Exception('Must have transaction details.');
 		}
 		$txnDetails = $this->_setTxnDetails($dataArray['Transaction']);
-		// 3DSecure element here
 		$xml = xmlwriter_open_memory();
 		xmlwriter_start_element($xml,'Request');
 		xmlwriter_write_raw($xml,$auth);
 		xmlwriter_start_element($xml,'Transaction');
 		xmlwriter_write_raw($xml,$cardTxn);
 		xmlwriter_write_raw($xml,$txnDetails);
+		xmlwriter_write_raw($xml,$this->_threeDSecure());
 		xmlwriter_end_element($xml);
 		xmlwriter_end_element($xml);
 		return xmlwriter_output_memory($xml,true);
