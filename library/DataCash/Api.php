@@ -101,10 +101,8 @@ class DataCash_Api {
 		} 
 		if (true === $this->_config->cv2avs->check && !array_key_exists('CV2Avs', $params)) {
 			throw new Zend_Exception('CV2 data not present');
-		} else {
-			return $this->_setCV2Address($params['CV2Avs']);
 		}
-		return false;
+		return $this->_setCV2Address($params['CV2Avs']);
 	}
 	
 	/**
@@ -141,6 +139,7 @@ class DataCash_Api {
 		if (array_key_exists('cv2',$params)) {
 			xmlwriter_write_element($xml,'cv2',$params['cv2']);
 		}
+		xmlwriter_write_raw($xml, $this->_handleExtendedPolicy());
 		xmlwriter_end_element($xml);
 		return xmlwriter_output_memory($xml, true);
 	}
@@ -227,7 +226,7 @@ class DataCash_Api {
 	 *
 	 * @return bool
 	 */
-	function _extendedPolicyCheck() {
+	function _handleExtendedPolicy() {
 		if (false === $this->_checkPolicy('cv2_policy')) {
 			throw new Zend_Exception('Unable to set cv2_policy, all cv2 policy settings should be accessible.');
 		}
