@@ -242,7 +242,8 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	}
 	
 	function testSetRequestIfExtendedPolicyConfigIsSetToFalseReturnFalse() {
-		$this->assertFalse($this->_apiConfigWrapper->_extendedPolicyCheck());
+		$this->setExpectedException('Zend_Exception');
+		$this->_apiConfigWrapper->_extendedPolicyCheck();
 	}
 	
 	function testvVlidatePolicyThrowsExceptionIfExtendedPolicySetButNoCV2PolicyPresent() {
@@ -251,7 +252,12 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	}
 	
 	function testValidatePolicyThrowsExceptionIfExtendedPolicysetButNoPostCodePolicyPresent() {
-		$this->assertEquals(1,$this->_api->_extendedPolicyCheck());
+		$expected = '<ExtendedPolicy><cv2_policy notprovided="reject" notchecked="accept" matched="accept" notmatched="reject" partialmatch="reject"/><postcode_policy notprovided="reject" notchecked="accept" matched="accept" notmatched="reject" partialmatch="reject"/><address_policy notprovided="reject" notchecked="accept" matched="accept" notmatched="reject" partialmatch="reject"/></ExtendedPolicy>';
+		$this->assertEquals($expected,$this->_api->_extendedPolicyCheck());
 	}
+	
+	/**
+	 * We now need to retrieve the extended policies and insert the results int cv2avs
+	 */
 	
 }
