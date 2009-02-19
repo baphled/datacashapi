@@ -242,21 +242,22 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	
 	function testSetRequestIfExtendedPolicyConfigIsSetToFalseReturnFalse() {
 		$this->setExpectedException('Zend_Exception');
-		$this->_apiConfigWrapper->_handleExtendedPolicy();
+		$fixture = $this->_fixture->find('CompleteDepositRequest');
+		$this->_apiConfigWrapper->setRequest($fixture);
 	}
 	
 	function testvVlidatePolicyThrowsExceptionIfExtendedPolicySetButNoCV2PolicyPresent() {
 		$this->setExpectedException('Zend_Exception');
-		$this->_apiExtendedPolicy->_handleExtendedPolicy();
-	}
-	
-	function testValidatePolicyThrowsExceptionIfExtendedPolicysetButNoPostCodePolicyPresent() {
-		$expected = '<ExtendedPolicy><cv2_policy notprovided="reject" notchecked="accept" matched="accept" notmatched="reject" partialmatch="reject"/><postcode_policy notprovided="reject" notchecked="accept" matched="accept" notmatched="reject" partialmatch="reject"/><address_policy notprovided="reject" notchecked="accept" matched="accept" notmatched="reject" partialmatch="reject"/></ExtendedPolicy>';
-		$this->assertEquals($expected,$this->_api->_handleExtendedPolicy());
+		$fixture = $this->_fixture->find('CompleteDepositRequest');
+		$this->_apiExtendedPolicy->setRequest($fixture);
 	}
 	
 	/**
 	 * We now need to retrieve the extended policies and insert the results int cv2avs
 	 */
-	
+	function testValidatePolicyThrowsExceptionIfExtendedPolicysetButNoPostCodePolicyPresent() {
+		$expected = '<ExtendedPolicy><cv2_policy notprovided="reject" notchecked="accept" matched="accept" notmatched="reject" partialmatch="reject"/><postcode_policy notprovided="reject" notchecked="accept" matched="accept" notmatched="reject" partialmatch="reject"/><address_policy notprovided="reject" notchecked="accept" matched="accept" notmatched="reject" partialmatch="reject"/></ExtendedPolicy>';
+		$fixture = $this->_fixture->find('CompleteDepositRequest');
+		$this->assertContains($expected,$this->_api->setRequest($fixture));
+	}
 }

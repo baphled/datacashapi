@@ -174,7 +174,7 @@ class DataCash_Api {
 	 * @param string $policy
 	 * @return bool
 	 */
-	function _checkPolicy($policy = '') {
+	private function _checkPolicy($policy = '') {
 		if(empty($policy)) {
 			throw new Zend_exception('Policy must be valid');
 		}
@@ -185,7 +185,7 @@ class DataCash_Api {
 		return true;
 	}
 	
-	function _policyEmpty($policy) {
+	private function _policyEmpty($policy) {
 		if(empty($this->_config->extendedPolicy->$policy->notprovided) ||
 			 empty($this->_config->extendedPolicy->$policy->notchecked) ||
 			 empty($this->_config->extendedPolicy->$policy->matched) ||
@@ -196,7 +196,7 @@ class DataCash_Api {
 		return true;
 	}
 	
-	function _policyCheckSet($policy) {
+	private function _policyCheckSet($policy) {
 		if(!isset($this->_config->extendedPolicy->$policy->notprovided) ||
 			 !isset($this->_config->extendedPolicy->$policy->notchecked) || 
 			 !isset($this->_config->extendedPolicy->$policy->matched) || 
@@ -207,7 +207,7 @@ class DataCash_Api {
 		return true;
 	}
 	
-	function _writePolicy($policy = '') {
+	private function _writePolicy($policy = '') {
 		if(empty($policy)) {
 			throw new Zend_Exception('Invalid '.$policy .', unable to write.');
 		}
@@ -226,7 +226,7 @@ class DataCash_Api {
 	 *
 	 * @return bool
 	 */
-	function _handleExtendedPolicy() {
+	private function _handleExtendedPolicy() {
 		if (false === $this->_checkPolicy('cv2_policy')) {
 			throw new Zend_Exception('Unable to set cv2_policy, all cv2 policy settings should be accessible.');
 		}
