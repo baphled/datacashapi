@@ -175,37 +175,75 @@ class DataCash_Api {
 	 * @param string $policy
 	 * @return bool
 	 */
-	function _getPolicy($policy = '') {
+	function _checkPolicy($policy = '') {
 		if(empty($policy)) {
 			throw new Zend_exception('Policy must be valid');
 		}
-		if (false !== $this->_config->extendedPolicy->set && 
-			(!isset($this->_config->extendedPolicy->$policy->notprovided) ||
-			 !isset($this->_config->extendedPolicy->$policy->notchecked) ||
-			 !isset($this->_config->extendedPolicy->$policy->mathed) ||
-			 !isset($this->_config->extendedPolicy->$policy->notmatched) ||
-			 !isset($this->_config->extendedPolicy->$policy->partialmatch))) {
+		if (0 !== $this->_config->extendedPolicy->set && 
+			false === ($this->_policyCheckSet($policy) && $this->_policyEmpty($policy))) {
 			return false;
 		}
 		return true;
 	}
 	
+	function _policyEmpty($policy) {
+		if(empty($this->_config->extendedPolicy->$policy->notprovided) ||
+			 empty($this->_config->extendedPolicy->$policy->notchecked) ||
+			 empty($this->_config->extendedPolicy->$policy->matched) ||
+			 empty($this->_config->extendedPolicy->$policy->notmatched) ||
+			 empty($this->_config->extendedPolicy->$policy->partialmatch)) {
+			 	return false;
+		}
+		return true;
+	}
+	
+	function _policyCheckSet($policy) {
+		if(!isset($this->_config->extendedPolicy->$policy->notprovided) ||
+			 !isset($this->_config->extendedPolicy->$policy->notchecked) || 
+			 !isset($this->_config->extendedPolicy->$policy->matched) || 
+			 !isset($this->_config->extendedPolicy->$policy->notmatched) || 
+			 !isset($this->_config->extendedPolicy->$policy->partialmatch)) {
+			 	return false;
+			 }
+		return true;
+	}
+	
+	function _writePolicy($policy = '') {
+		if(empty($policy)) {
+			throw new Zend_Exception('Invalid '.$policy .', unable to write.');
+		}
+		$xml = xmlwriter_open_memory();
+		xmlwriter_start_element($xml,$policy);
+		xmlwriter_write_attribute($xml,'notprovided',$this->_config->extendedPolicy->$policy->notprovided);
+		xmlwriter_write_attribute($xml,'notchecked',$this->_config->extendedPolicy->$policy->notchecked);
+		xmlwriter_write_attribute($xml,'matched',$this->_config->extendedPolicy->$policy->matched);
+		xmlwriter_write_attribute($xml,'notmatched',$this->_config->extendedPolicy->$policy->notmatched);
+		xmlwriter_write_attribute($xml,'partialmatch',$this->_config->extendedPolicy->$policy->partialmatch);
+		xmlwriter_end_element($xml);
+		return xmlwriter_output_memory($xml,true);
+	}
 	/**
 	 * Checxks that we have all the needed extended policy data, throws exception if something goes wrong.
 	 *
 	 * @return bool
 	 */
 	function _extendedPolicyCheck() {
-		if (false === $this->_getPolicy('cv2_policy')) {
-			throw new Zend_Exception('Extended policy set, all cv2 policy settings should be accessible.');
+		if (false === $this->_checkPolicy('cv2_policy')) {
+			throw new Zend_Exception('Unable to set cv2_policy, all cv2 policy settings should be accessible.');
 		}
-		if (false === $this->_getPolicy('postcode_policy')) {
-			throw new Zend_Exception('Extended policy set, all policy postcode policy settings should be accessible.');
+		if (false === $this->_checkPolicy('postcode_policy')) {
+			throw new Zend_Exception('Unable to set postcode_policy, all policy postcode policy settings should be accessible.');
 		}
-		if (false === $this->_getPolicy('address_policy')) {
-			throw new Zend_Exception('Extended policy set, all policy address policy settings should be accessible.');
+		if (false === $this->_checkPolicy('address_policy')) {
+			throw new Zend_Exception('Unable to set address_policy, all policy address policy settings should be accessible.');
 		}
-		return $this->_config->extendedPolicy->set;
+		$xml = xmlwriter_open_memory();
+		xmlwriter_start_element($xml,'ExtendedPolicy');
+		xmlwriter_write_raw($xml, $this->_writePolicy('cv2_policy'));
+		xmlwriter_write_raw($xml, $this->_writePolicy('postcode_policy'));
+		xmlwriter_write_raw($xml, $this->_writePolicy('address_policy'));
+		xmlwriter_end_element($xml);
+		return xmlwriter_output_memory($xml,true);
 	}
 	/**
 	 * Sets out TxnDetails
