@@ -26,6 +26,13 @@ class DatacashApiConfigWrapper extends DataCash_Api {
 		$this->_config->extendedPolicy->set = false;
 	}
 }
+
+class DatacashApiConfig3DSecure extends DataCash_Api {
+	function __construct() {
+		$this->_config = new FakeConfig();
+		$this->_config->threeDSecure->verify = false;
+	}
+}
 /**
  * DataCashApi Testcase.
  * @author Yomi (baphled) Colledge <yomi@boodah.net> 2009
@@ -52,6 +59,7 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 		$this->_apiWrapper = new DataCashApiWrapper();
 		$this->_apiConfigWrapper = new DatacashApiConfigWrapper();
 		$this->_apiExtendedPolicy = new DatacashApiExtendedPolicyWrapper();
+		$this->_api3DSecureNoVerify = new DatacashApiConfig3DSecure();
 	}
 	
 	function tearDown() {
@@ -61,6 +69,7 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 		unset($this->_apiWrapper);
 		unset($this->_apiConfigWrapper);
 		unset($this->_apiExtendedPolicy);
+		unset($this->_api3DSecureNoVerify);
 	}
 	
 	/**
@@ -255,9 +264,23 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * We now need to retrieve the extended policies and insert the results int cv2avs
 	 */
-	function testValidatePolicyThrowsExceptionIfExtendedPolicysetButNoPostCodePolicyPresent() {
+	function testSetRequestsReturnsExtendedPolicy() {
 		$expected = '<ExtendedPolicy><cv2_policy notprovided="reject" notchecked="accept" matched="accept" notmatched="reject" partialmatch="reject"/><postcode_policy notprovided="reject" notchecked="accept" matched="accept" notmatched="reject" partialmatch="reject"/><address_policy notprovided="reject" notchecked="accept" matched="accept" notmatched="reject" partialmatch="reject"/></ExtendedPolicy>';
 		$fixture = $this->_fixture->find('CompleteDepositRequest');
 		$this->assertContains($expected,$this->_api->setRequest($fixture));
+	}
+	
+	function test3DSecureThrowsExceptionIfNoConfigPropertySet() {
+		$this->setExpectedException('Zend_Exception');
+		$this->_apiConfigWrapper->_threeDSecure();
+	}
+	
+	function test3DSecureMethodReturnsEmptyElementIfConfigSetToNo() {
+		$this->assertContains('<ThreeDSecure><verify>no</verify></ThreeDSecure>',$this->_api3DSecureNoVerify->_threeDSecure());
+	}
+	
+	function test3DSecureMethodReturnsEmptyElementIfConfigSetToYes() {
+		print_r($this->_api->_threeDSecure());
+		$this->assertContains('yes',$this->_api->_threeDSecure());
 	}
 }

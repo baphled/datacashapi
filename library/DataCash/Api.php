@@ -185,6 +185,12 @@ class DataCash_Api {
 		return true;
 	}
 	
+	/**
+	 * Determines whether our policy data is empty or not
+	 *
+	 * @param 	string 	$policy		Name of the extended policy
+	 * @return 	bool				True is valid, false otherwise
+	 */
 	private function _policyEmpty($policy) {
 		if(empty($this->_config->extendedPolicy->$policy->notprovided) ||
 			 empty($this->_config->extendedPolicy->$policy->notchecked) ||
@@ -196,6 +202,12 @@ class DataCash_Api {
 		return true;
 	}
 	
+	/**
+	 * Determines whether our policy data is set or not
+	 *
+	 * @param 	string 	$policy		Name of the extended policy
+	 * @return 	bool				True is valid, false otherwise
+	 */
 	private function _policyCheckSet($policy) {
 		if(!isset($this->_config->extendedPolicy->$policy->notprovided) ||
 			 !isset($this->_config->extendedPolicy->$policy->notchecked) || 
@@ -207,6 +219,12 @@ class DataCash_Api {
 		return true;
 	}
 	
+	/**
+	 * Creates our extended policy XML
+	 *
+	 * @param 	string 	$policy		Name of the extended policy
+	 * @return 	bool				True is valid, false otherwise
+	 */
 	private function _writePolicy($policy = '') {
 		if(empty($policy)) {
 			throw new Zend_Exception('Invalid '.$policy .', unable to write.');
@@ -244,6 +262,7 @@ class DataCash_Api {
 		xmlwriter_end_element($xml);
 		return xmlwriter_output_memory($xml,true);
 	}
+	
 	/**
 	 * Sets out TxnDetails
 	 *
@@ -273,6 +292,29 @@ class DataCash_Api {
 		return xmlwriter_output_memory($xml,true);
 	}
 	
+	function _threeDSecure() {
+		if(!isset($this->_config->threeDSecure->verify)) {
+			throw new Zend_Exception('Need to set 3dSecure property.');
+		}
+		$xml = xmlwriter_open_memory();
+		xmlwriter_start_element($xml,'ThreeDSecure');
+		if(1 == $this->_config->threeDSecure->verify) {
+			xmlwriter_write_element($xml,'verify','yes');
+			xmlwriter_write_element($xml,'merchant_url',$this->_config->threeDSecure->merchant_url);
+			xmlwriter_write_element($xml,'purchase_desc',$this->_config->threeDSecure->purchase_desc);
+			xmlwriter_write_element($xml,'purchase_datetime',date('Ymd H:i:s'));
+			xmlwriter_start_element($xml,'Browser');
+			xmlwriter_write_element($xml,'device_category',$this->_config->threeDSecure->device_category);
+			xmlwriter_write_element($xml,'accept_headers',$this->_config->threeDSecure->accept_headers);
+			xmlwriter_write_element($xml,'user_agent',$_SERVER['HTTP_USER_AGENT']);
+			xmlwriter_end_element($xml);
+		} else {
+			xmlwriter_write_element($xml,'verify','no');
+		}
+		xmlwriter_end_element($xml);
+		return xmlwriter_output_memory($xml,true);
+	}
+	
 	/**
 	 * Sets our transaction request
 	 *
@@ -295,6 +337,7 @@ class DataCash_Api {
 			throw new Zend_Exception('Must have transaction details.');
 		}
 		$txnDetails = $this->_setTxnDetails($dataArray['Transaction']);
+		// 3DSecure element here
 		$xml = xmlwriter_open_memory();
 		xmlwriter_start_element($xml,'Request');
 		xmlwriter_write_raw($xml,$auth);
