@@ -355,6 +355,7 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	
 	function test3DSecureThrowsExceptionIfNoConfigPropertySet() {
 		$this->setExpectedException('Zend_Exception');
+		$fixture = $this->_fixture->find('CompleteDepositRequest');
 		$this->_apiConfigWrapper->setRequest($fixture);
 	}
 	

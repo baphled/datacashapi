@@ -60,17 +60,16 @@ class DataCash_Api {
 	 * @return 	String	XML element.
 	 */
 	private function _setCardData($params = array()) {
-		
 		if (!array_key_exists('Card',$params)) {
 			throw new Zend_Exception('No card data.');
 		}
-		$cardDataArray = $params['Card'];
+		
 		if (empty($cardDataArray) ||
 			 !array_key_exists('pan',$cardDataArray) ||
 			 !array_key_exists('expirydate',$cardDataArray)) {
 			throw new Zend_Exception('Need to pass array containing cards details');
 		}
-		
+		$cardDataArray = $params['Card'];
 		$xml = xmlwriter_open_memory();
 		xmlwriter_start_element($xml, 'Card');
 		xmlwriter_write_element($xml,'pan',$cardDataArray['pan']);
@@ -292,6 +291,12 @@ class DataCash_Api {
 		return xmlwriter_output_memory($xml,true);
 	}
 	
+	/**
+	 * Creates our 3DSecure XML elements, need to do 3DSecure checks
+	 * using DataCash
+	 *
+	 * @return String	$xml	3DSecure XML result.
+	 */
 	private function _threeDSecure() {
 		if(!isset($this->_config->threeDSecure->verify)) {
 			throw new Zend_Exception('Need to set 3dSecure property.');
