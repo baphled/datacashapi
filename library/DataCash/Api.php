@@ -53,6 +53,9 @@ class DataCash_Api {
 			 !array_key_exists('expirydate',$cardDataArray)) {
 			throw new Zend_Exception('Need to pass array containing cards details');
 		}
+		if (!array_key_exists('CV2Avs',$params)) {
+			throw new Zend_Exception('No datacash cv2avs settings, please resolve.');
+		} 
 	}
 	
 	/**
@@ -69,7 +72,6 @@ class DataCash_Api {
 		if (true === $this->_config->cv2avs->check && !array_key_exists('CV2Avs', $params)) {
 			throw new Zend_Exception('CV2 data not present');
 		}
-		return $this->_handleCV2Address($params['CV2Avs']);
 	}
 
 	/**
@@ -107,6 +109,20 @@ class DataCash_Api {
 	}
 	
 	/**
+	 * Makes sure we have set the nessary 3DSecure properties
+	 * in our configuration file.
+	 *
+	 */
+	private function _validate3DSecure() {
+		if(!isset($this->_config->threeDSecure->merchant_url) ||
+			!isset($this->_config->threeDSecure->purchase_desc) ||
+			!isset($this->_config->threeDSecure->device_category) ||
+			!isset($this->_config->threeDSecure->accept_headers)) {
+				throw new Zend_Exception('Need to set 3DSecure properies.');
+			}
+	}
+	
+	/**
 	 * sets up and gets our authentication information from our
 	 * environments configuration file.
 	 * 
@@ -135,7 +151,7 @@ class DataCash_Api {
 	 */
 	private function _handleCardData($params = array()) {
 		$this->_validateCard($params);
-		
+		$this->_validateCV2Avs($params);
 		$cardDataArray = $params['Card'];
 		
 		$xml = xmlwriter_open_memory();
@@ -146,10 +162,8 @@ class DataCash_Api {
 			xmlwriter_write_element($xml,'startdate',$cardDataArray['startdate']);
 			xmlwriter_write_element($xml,'issuenumber',$cardDataArray['issuenumber']);
 		}
-		if (!array_key_exists('CV2Avs',$params)) {
-			throw new Zend_Exception('No datacash cv2avs settings, please resolve.');
-		} 
-		xmlwriter_write_raw($xml,$this->_validateCV2Avs($params));
+		
+		xmlwriter_write_raw($xml,$this->_handleCV2Address($params['CV2Avs']));
 		xmlwriter_end_element($xml);
 
 		return xmlwriter_output_memory($xml, true);
@@ -163,7 +177,7 @@ class DataCash_Api {
 	 */
 	private function _handleTxnDetails($params = array()) {
 		if (empty($params)) {
-			throw new Zend_Exception('Parameters must be set');
+			throw new Zend_Exception('TxnDetails parameters must be set');
 		}
 		if (!array_key_exists('merchantreference',$params) || !array_key_exists('amount',$params)) {
 			throw new Zend_Exception('Must supply merchant reference & amount');
@@ -218,9 +232,6 @@ class DataCash_Api {
 	 * 
 	 */
 	private function _handleCV2Address($params) {
-		if (empty($params)) {
-			throw new Zend_Exception('no Address details.');
-		}
 		$xml = xmlwriter_open_memory();
 		xmlwriter_start_element($xml,'CV2Avs');
 		$xml = $this->_handleAddress($xml, $params);
@@ -284,19 +295,20 @@ class DataCash_Api {
 	 */
 	private function _handleThreeDSecure() {
 		if(!isset($this->_config->threeDSecure->verify)) {
-			throw new Zend_Exception('Need to set 3dSecure property.');
+			throw new Zend_Exception('Need to set 3DSecure verify property.');
 		}
 		$xml = xmlwriter_open_memory();
-		xmlwriter_start_element($xml,'ThreeDSecure');
+		xmlwriter_start_element($xml, 'ThreeDSecure');
 		if(1 == $this->_config->threeDSecure->verify) {
-			xmlwriter_write_element($xml,'verify','yes');
-			xmlwriter_write_element($xml,'merchant_url',$this->_config->threeDSecure->merchant_url);
-			xmlwriter_write_element($xml,'purchase_desc',$this->_config->threeDSecure->purchase_desc);
-			xmlwriter_write_element($xml,'purchase_datetime',date('Ymd H:i:s'));
-			xmlwriter_start_element($xml,'Browser');
-			xmlwriter_write_element($xml,'device_category',$this->_config->threeDSecure->device_category);
-			xmlwriter_write_element($xml,'accept_headers',$this->_config->threeDSecure->accept_headers);
-			xmlwriter_write_element($xml,'user_agent',$_SERVER['HTTP_USER_AGENT']);
+			$this->_validate3DSecure();
+			xmlwriter_write_element($xml, 'verify', 'yes');
+			xmlwriter_write_element($xml, 'merchant_url', $this->_config->threeDSecure->merchant_url);
+			xmlwriter_write_element($xml, 'purchase_desc', $this->_config->threeDSecure->purchase_desc);
+			xmlwriter_write_element($xml, 'purchase_datetime', date('Ymd H:i:s'));
+			xmlwriter_start_element($xml, 'Browser');
+			xmlwriter_write_element($xml, 'device_category', $this->_config->threeDSecure->device_category);
+			xmlwriter_write_element($xml, 'accept_headers', $this->_config->threeDSecure->accept_headers);
+			xmlwriter_write_element($xml, 'user_agent', $_SERVER['HTTP_USER_AGENT']);
 			xmlwriter_end_element($xml);
 		} else {
 			xmlwriter_write_element($xml,'verify','no');
