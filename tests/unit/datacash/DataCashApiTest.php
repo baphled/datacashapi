@@ -95,23 +95,23 @@ class DatacashApiConfig3DSecure extends DataCash_Api {
 	function __construct() {
 		$this->_config = new FakeConfig();
 		$this->_config->extendedPolicy->set = true;
-		$this->_config->extendedPolicy->cv2_policy->notprovided = reject;
-		$this->_config->extendedPolicy->cv2_policy->notchecked = accept;
-		$this->_config->extendedPolicy->cv2_policy->matched = accept;
-		$this->_config->extendedPolicy->cv2_policy->notmatched = reject;
-		$this->_config->extendedPolicy->cv2_policy->partialmatch = reject;
+		$this->_config->extendedPolicy->cv2_policy->notprovided = 'reject';
+		$this->_config->extendedPolicy->cv2_policy->notchecked = 'accept';
+		$this->_config->extendedPolicy->cv2_policy->matched = 'accept';
+		$this->_config->extendedPolicy->cv2_policy->notmatched = 'reject';
+		$this->_config->extendedPolicy->cv2_policy->partialmatch = 'reject';
 		
-		$this->_config->extendedPolicy->postcode_policy->notprovided = reject;
-		$this->_config->extendedPolicy->postcode_policy->notchecked = accept;
-		$this->_config->extendedPolicy->postcode_policy->matched = accept;
-		$this->_config->extendedPolicy->postcode_policy->notmatched = reject;
-		$this->_config->extendedPolicy->postcode_policy->partialmatch = reject;
+		$this->_config->extendedPolicy->postcode_policy->notprovided = 'reject';
+		$this->_config->extendedPolicy->postcode_policy->notchecked = 'accept';
+		$this->_config->extendedPolicy->postcode_policy->matched = 'accept';
+		$this->_config->extendedPolicy->postcode_policy->notmatched = 'reject';
+		$this->_config->extendedPolicy->postcode_policy->partialmatch = 'reject';
 		
-		$this->_config->extendedPolicy->address_policy->notprovided = reject;
-		$this->_config->extendedPolicy->address_policy->notchecked = accept;
-		$this->_config->extendedPolicy->address_policy->matched = accept;
-		$this->_config->extendedPolicy->address_policy->notmatched = reject;
-		$this->_config->extendedPolicy->address_policy->partialmatch = reject;
+		$this->_config->extendedPolicy->address_policy->notprovided = 'reject';
+		$this->_config->extendedPolicy->address_policy->notchecked = 'accept';
+		$this->_config->extendedPolicy->address_policy->matched = 'accept';
+		$this->_config->extendedPolicy->address_policy->notmatched = 'reject';
+		$this->_config->extendedPolicy->address_policy->partialmatch = 'reject';
 		$this->_config->cv2avs->check = true;
 		$this->_config->threeDSecure->verify = false;
 	}
@@ -348,8 +348,9 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	 * We now need to retrieve the extended policies and insert the results int cv2avs
 	 */
 	function testSetRequestsReturnsExtendedPolicy() {
-		$expected = '<ExtendedPolicy><cv2_policy notprovided="reject" notchecked="accept" matched="accept" notmatched="reject" partialmatch="reject"/><postcode_policy notprovided="reject" notchecked="accept" matched="accept" notmatched="reject" partialmatch="reject"/><address_policy notprovided="reject" notchecked="accept" matched="accept" notmatched="reject" partialmatch="reject"/></ExtendedPolicy>';
+		$expected = '<ExtendedPolicy><cv2_policy notprovided="reject" notchecked="accept" matched="accept" notmatched="reject" partialmatch="reject"/><postcode_policy notprovided="reject" notchecked="accept" matched="accept" notmatched="reject" partialmatch="reject"/><address_policy notprovided="reject" notchecked="accept" matched="accept" notmatched="reject" partialmatch="accept"/></ExtendedPolicy>';
 		$fixture = $this->_fixture->find('CompleteDepositRequest');
+		print_r($this->_api->setRequest($fixture));
 		$this->assertContains($expected,$this->_api->setRequest($fixture));
 	}
 	

@@ -64,12 +64,13 @@ class DataCash_Api {
 			throw new Zend_Exception('No card data.');
 		}
 		
+		$cardDataArray = $params['Card'];
 		if (empty($cardDataArray) ||
 			 !array_key_exists('pan',$cardDataArray) ||
 			 !array_key_exists('expirydate',$cardDataArray)) {
 			throw new Zend_Exception('Need to pass array containing cards details');
 		}
-		$cardDataArray = $params['Card'];
+		
 		$xml = xmlwriter_open_memory();
 		xmlwriter_start_element($xml, 'Card');
 		xmlwriter_write_element($xml,'pan',$cardDataArray['pan']);
