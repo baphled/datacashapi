@@ -22,6 +22,12 @@ class DataCash_Api {
 	 */
 	protected $_config;
 	
+	/**
+	 * Gathers or configuration settings for DataCash
+	 *
+	 * @param string $configPath
+	 * @param string $file
+	 */
 	function __construct($configPath = null,$file=null) {
 		if (null !== $configPath && null !== $file) {
 			Zend_ConfigSettings::setUpConfig($configPath,$file);
@@ -32,6 +38,11 @@ class DataCash_Api {
 		$this->_config = Zend_Registry::get($config->environment)->datacash;
 	}
 	
+	/**
+	 * Validates our parameters making sure we have card information.
+	 *
+	 * @param array $params
+	 */
 	private function _validateCard($params) {
 	if (!array_key_exists('Card',$params)) {
 			throw new Zend_Exception('No card data.');
@@ -43,6 +54,7 @@ class DataCash_Api {
 			throw new Zend_Exception('Need to pass array containing cards details');
 		}
 	}
+	
 	/**
 	 * Checks to see if we need to do a CV2 check, if so validates our params.
 	 *
@@ -82,6 +94,18 @@ class DataCash_Api {
 		}
 	}
 
+	/**
+	 * Validate our policies, making sure that they are all set
+	 *
+	 */
+	private function _validatePolicies() {
+		if (false === ($this->_checkPolicy('cv2_policy') ||
+			$this->_checkPolicy('postcode_policy') ||
+			$this->_checkPolicy('address_policy'))) {
+			throw new Zend_Exception('All policies settings should be accessible.');
+		}
+	}
+	
 	/**
 	 * sets up and gets our authentication information from our
 	 * environments configuration file.
@@ -242,15 +266,7 @@ class DataCash_Api {
 	 * @return bool
 	 */
 	private function _handleExtendedPolicy() {
-		if (false === $this->_checkPolicy('cv2_policy')) {
-			throw new Zend_Exception('Unable to set cv2_policy, all cv2 policy settings should be accessible.');
-		}
-		if (false === $this->_checkPolicy('postcode_policy')) {
-			throw new Zend_Exception('Unable to set postcode_policy, all policy postcode policy settings should be accessible.');
-		}
-		if (false === $this->_checkPolicy('address_policy')) {
-			throw new Zend_Exception('Unable to set address_policy, all policy address policy settings should be accessible.');
-		}
+		$this->_validatePolicies();
 		$xml = xmlwriter_open_memory();
 		xmlwriter_start_element($xml,'ExtendedPolicy');
 		xmlwriter_write_raw($xml, $this->_writePolicy('cv2_policy'));
