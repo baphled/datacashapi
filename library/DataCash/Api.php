@@ -179,7 +179,7 @@ class DataCash_Api {
 			throw new Zend_exception('Policy must be valid');
 		}
 		if (0 !== $this->_config->extendedPolicy->set && 
-			false === ($this->_policyCheckSet($policy) && $this->_policyEmpty($policy))) {
+			false === ($this->_policyCheckSet($policy) || $this->_policyEmpty($policy))) {
 			return false;
 		}
 		return true;
