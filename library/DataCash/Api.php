@@ -14,13 +14,8 @@
  *
  * $LastChangedBy: yomi $
  */
-class DataCash_Api {
-	/**
-	 * Will store outhentication element
-	 *
-	 * @var String	Authentication XML element.
-	 */
-	protected $_config;
+
+class DataCash_Api extends DataCash_Base {
 	
 	/**
 	 * Gathers or configuration settings for DataCash
@@ -29,13 +24,7 @@ class DataCash_Api {
 	 * @param string $file
 	 */
 	function __construct($configPath = null,$file=null) {
-		if (null !== $configPath && null !== $file) {
-			Zend_ConfigSettings::setUpConfig($configPath,$file);
-		} else {
-			Zend_ConfigSettings::setUpConfig();
-		}
-		$config = Zend_Registry::get('general');
-		$this->_config = Zend_Registry::get($config->environment)->datacash;
+		parent::__construct($configPath,$file);
 	}
 	
 	/**
@@ -53,7 +42,7 @@ class DataCash_Api {
 			 !array_key_exists('expirydate',$cardDataArray)) {
 			throw new Zend_Exception('Need to pass array containing cards details');
 		}
-		if (!array_key_exists('CV2Avs',$params)) {
+		if (!array_key_exists('Cv2Avs',$params)) {
 			throw new Zend_Exception('No datacash cv2avs settings, please resolve.');
 		} 
 	}
@@ -69,7 +58,7 @@ class DataCash_Api {
 		if (empty($params) || !isset($this->_config->cv2avs->check)) {
 			throw new Zend_Exception('No datacash cv2avs settings, please resolve.');
 		} 
-		if (true === $this->_config->cv2avs->check && !array_key_exists('CV2Avs', $params)) {
+		if (true === $this->_config->cv2avs->check && !array_key_exists('Cv2Avs', $params)) {
 			throw new Zend_Exception('CV2 data not present');
 		}
 	}
@@ -151,7 +140,7 @@ class DataCash_Api {
 	 */
 	private function _handleCardData($params = array()) {
 		$this->_validateCard($params);
-		$this->_validateCV2Avs($params);
+		$this->_validateCv2Avs($params);
 		$cardDataArray = $params['Card'];
 		
 		$xml = xmlwriter_open_memory();
@@ -163,7 +152,7 @@ class DataCash_Api {
 			xmlwriter_write_element($xml,'issuenumber',$cardDataArray['issuenumber']);
 		}
 		
-		xmlwriter_write_raw($xml,$this->_handleCV2Address($params['CV2Avs']));
+		xmlwriter_write_raw($xml,$this->_handleCV2Address($params['Cv2Avs']));
 		xmlwriter_end_element($xml);
 
 		return xmlwriter_output_memory($xml, true);
@@ -194,6 +183,8 @@ class DataCash_Api {
 		}
 		xmlwriter_text($xml,$params['amount']);
 		xmlwriter_end_element($xml);
+		$threeDSecure = $this->_handleThreeDSecure();
+		xmlwriter_write_raw($xml,$threeDSecure);
 		xmlwriter_end_element($xml);
 		return xmlwriter_output_memory($xml,true);
 	}
@@ -225,7 +216,7 @@ class DataCash_Api {
 	}
 	
 	/**
-	 * Sets our CV2Avs check inforamtion ready to send off to DataCash
+	 * Sets our Cv2Avs check inforamtion ready to send off to DataCash
 	 *
 	 * @param array $params
 	 * @return string	$xml	Our resulting request body for Cv2Avs element.
@@ -233,7 +224,7 @@ class DataCash_Api {
 	 */
 	private function _handleCV2Address($params) {
 		$xml = xmlwriter_open_memory();
-		xmlwriter_start_element($xml,'CV2Avs');
+		xmlwriter_start_element($xml,'Cv2Avs');
 		$xml = $this->_handleAddress($xml, $params);
 		if (array_key_exists('postcode',$params)) {
 			xmlwriter_write_element($xml,'postcode',$params['postcode']);
@@ -404,7 +395,6 @@ class DataCash_Api {
 		xmlwriter_start_element($xml, 'Transaction');
 		xmlwriter_write_raw($xml, $cardTxn);
 		xmlwriter_write_raw($xml, $txnDetails);
-		xmlwriter_write_raw($xml, $this->_handleThreeDSecure());
 		xmlwriter_end_element($xml);
 		xmlwriter_end_element($xml);
 		return xmlwriter_output_memory($xml,true);
@@ -417,7 +407,7 @@ class DataCash_Api {
 	 * @return 	String		$xml		The XML request we want to send to DataCash
 	 */
 	function setRequest($dataArray = array(), $method='deposit') {
-		$this->_validateRequest($dataArray, $method);
+		$this->_validateRequest($dataArray);
 		$auth = $this->_handleAuth($method);
 		$cardTxn = $this->_handleCardTxn($dataArray);
 		$txnDetails = $this->_handleTxnDetails($dataArray['Transaction']);

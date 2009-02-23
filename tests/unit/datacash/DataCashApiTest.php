@@ -1,6 +1,7 @@
 <?php
 require_once realpath(dirname(__FILE__) .'/../../libs/TestHelper.php');
-
+require_once 'Zend/Loader.php';
+Zend_Loader::registerAutoload();
 /**
  * DataCashApiWrapper
  * 
@@ -40,26 +41,6 @@ class FakeConfig {
 }
 
 /**
- * DatacashApiExtendedPolicyWrapper
- * 
- * Helps us to test condition where the extended policy is set to true
- * but has no other pieces of information
- * 
- * @author Yomi (baphled) Colledge <yomi@boodah.net> 2009
- * @version $Id$
- * @package DataCashApi
- * @subpackage Tests_DataCashApi
- *
- * $LastChangedBy: yomi $
- */
-class DatacashApiExtendedPolicyWrapper extends DataCash_Api {
-	function __construct() {
-		$this->_config = new FakeConfig();
-		$this->_config->extendedPolicy->set = true;
-	}
-}
-
-/**
  * DatacashApiConfigWrapper
  * 
  * Sets our Datacash extended policy to false
@@ -78,44 +59,6 @@ class DatacashApiConfigWrapper extends DataCash_Api {
 	}
 }
 
-/**
- * DatacashApiConfig3DSecure
- * 
- * Helps to setup our configuration so we can easily check what happens
- * if 3DSecure's config settings are false
- * 
- * @author Yomi (baphled) Colledge <yomi@boodah.net> 2009
- * @version $Id$
- * @package DataCashApi
- * @subpackage Tests_DataCashApi
- *
- * $LastChangedBy: yomi $
- */
-class DatacashApiConfig3DSecure extends DataCash_Api {
-	function __construct() {
-		$this->_config = new FakeConfig();
-		$this->_config->extendedPolicy->set = true;
-		$this->_config->extendedPolicy->cv2_policy->notprovided = 'reject';
-		$this->_config->extendedPolicy->cv2_policy->notchecked = 'accept';
-		$this->_config->extendedPolicy->cv2_policy->matched = 'accept';
-		$this->_config->extendedPolicy->cv2_policy->notmatched = 'reject';
-		$this->_config->extendedPolicy->cv2_policy->partialmatch = 'reject';
-		
-		$this->_config->extendedPolicy->postcode_policy->notprovided = 'reject';
-		$this->_config->extendedPolicy->postcode_policy->notchecked = 'accept';
-		$this->_config->extendedPolicy->postcode_policy->matched = 'accept';
-		$this->_config->extendedPolicy->postcode_policy->notmatched = 'reject';
-		$this->_config->extendedPolicy->postcode_policy->partialmatch = 'reject';
-		
-		$this->_config->extendedPolicy->address_policy->notprovided = 'reject';
-		$this->_config->extendedPolicy->address_policy->notchecked = 'accept';
-		$this->_config->extendedPolicy->address_policy->matched = 'accept';
-		$this->_config->extendedPolicy->address_policy->notmatched = 'reject';
-		$this->_config->extendedPolicy->address_policy->partialmatch = 'reject';
-		$this->_config->cv2avs->check = true;
-		$this->_config->threeDSecure->verify = false;
-	}
-}
 /**
  * DataCashApi Testcase.
  * @author Yomi (baphled) Colledge <yomi@boodah.net> 2009
@@ -141,8 +84,6 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 		$this->_api = new DataCash_Api();
 		$this->_apiWrapper = new DataCashApiWrapper();
 		$this->_apiConfigWrapper = new DatacashApiConfigWrapper();
-		$this->_apiExtendedPolicy = new DatacashApiExtendedPolicyWrapper();
-		$this->_api3DSecureNoVerify = new DatacashApiConfig3DSecure();
 	}
 	
 	function tearDown() {
@@ -254,13 +195,7 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 		$this->assertType('string',$result);
 		$this->assertEquals($expected[0],$result);
 	}
-	
-	function testSetRequestWithdrawalReturnsExpectedRequest() {
-		$fixture = $this->_fixture->find('CompleteWithdrawalRequest');
-		$result = $this->_api->setRequest($fixture,'withdrawal');
-		$this->assertContains('passwordWithdrawal', $result);
-	}
-	
+		
 	/**
 	 * CV2Avs checks will be executed if the settings require it
 	 * if this the the case the results will be placed inside
@@ -268,14 +203,15 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	 *
 	 */
 	function testSetCV2AvsCheckReturnsStringByDefault() {
-		$fixture = $this->_fixture->find('TestCV2AvsRequest');
+		$fixture = $this->_fixture->find('TestCv2AvsRequest');
+		print_r($fixture);
 		$result = $this->_api->setRequest($fixture);
 		$this->assertType('string',$result);
 	}
 	// We need to add CV2Avs checks to our requests
 	function testCV2AvsCheckThrowsExceptionIfConfigSettingsNotPresent() {
 		$this->setExpectedException('Zend_Exception');
-		$fixture = $this->_fixture->find('TestCV2AvsRequest');
+		$fixture = $this->_fixture->find('TestCv2AvsRequest');
 		$this->_apiConfigWrapper->setRequest($fixture);
 	}
 	
@@ -298,15 +234,16 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	 * we shouldn't throw any exceptions if the data is empty.
 	 */
 	function testSetCv2AddressResultIsNotNull() {
-		$fixture = $this->_fixture->find('TestCV2AvsSingleStreetAddressRequest');
+		$fixture = $this->_fixture->find('TestCv2AvsSingleStreetAddressRequest');
 		$result = $this->_api->setRequest($fixture);
+		print_r($result);
 		$this->assertNotNull($result);
-		$this->assertContains('CV2Avs',$result);
+		$this->assertContains('Cv2Avs',$result);
 		$this->assertContains('street_address1',$result);
 	}
 	
 	function testSetCv2DoesnotSetAddress2IfItIsNotSet() {
-		$fixture = $this->_fixture->find('TestCV2AvsNoStreetAddress2or3Request');
+		$fixture = $this->_fixture->find('NoStreetAddress2or3Request');
 		$result = $this->_api->setRequest($fixture);
 		$this->assertNotNull($result);
 		$this->assertNotContains('street_address2',$result);
@@ -314,7 +251,7 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	}
 	
 	function testSetCv2DoesNotHaveAddress() {
-		$fixture = $this->_fixture->find('TestCV2AvsNoAddressRequest');
+		$fixture = $this->_fixture->find('NoStreetAddress2or3Request');
 		$result = $this->_api->setRequest($fixture);
 		$this->assertNotNull($result);
 		$this->assertNotContains('street_address2',$result);
@@ -324,27 +261,11 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	
 	function testSetCv2AddressThrowsExceptionIfStreetAdress1KeyIsNotPresentOrSmispelt() {
 		$this->setExpectedException('Zend_Exception');
-		$fixture = $this->_fixture->find('TestCV2AvsNoStreetAddress1Request');
+		$fixture = $this->_fixture->find('TestCv2AvsNoStreetAddress1Request');
 		$this->_api->setRequest($fixture);
 	}
 	
-	function testSetRequestIfExtendedPolicyConfigIsSetButNotFound() {
-		$this->setExpectedException('Zend_Exception');
-		$fixture = $this->_fixture->find('TestCV2AvsNoStreetAddress2or3Request');
-		$this->_apiConfigWrapper->setRequest($fixture);
-	}
 	
-	function testSetRequestIfExtendedPolicyConfigIsSetToFalseReturnFalse() {
-		$this->setExpectedException('Zend_Exception');
-		$fixture = $this->_fixture->find('CompleteDepositRequest');
-		$this->_apiConfigWrapper->setRequest($fixture);
-	}
-	
-	function testvVlidatePolicyThrowsExceptionIfExtendedPolicySetButNoCV2PolicyPresent() {
-		$this->setExpectedException('Zend_Exception');
-		$fixture = $this->_fixture->find('CompleteDepositRequest');
-		$this->_apiExtendedPolicy->setRequest($fixture);
-	}
 	
 	/**
 	 * We now need to retrieve the extended policies and insert the results int cv2avs
@@ -353,17 +274,6 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 		$expected = '<ExtendedPolicy><cv2_policy notprovided="reject" notchecked="accept" matched="accept" notmatched="reject" partialmatch="reject"/><postcode_policy notprovided="reject" notchecked="accept" matched="accept" notmatched="reject" partialmatch="reject"/><address_policy notprovided="reject" notchecked="accept" matched="accept" notmatched="reject" partialmatch="accept"/></ExtendedPolicy>';
 		$fixture = $this->_fixture->find('CompleteDepositRequest');
 		$this->assertContains($expected,$this->_api->setRequest($fixture));
-	}
-	
-	function test3DSecureThrowsExceptionIfNoConfigPropertySet() {
-		$this->setExpectedException('Zend_Exception');
-		$fixture = $this->_fixture->find('CompleteDepositRequest');
-		$this->_apiConfigWrapper->setRequest($fixture);
-	}
-	
-	function test3DSecureMethodReturnsEmptyElementIfConfigSetToNo() {
-		$fixture = $this->_fixture->find('CompleteDepositRequest');
-		$this->assertContains('<ThreeDSecure><verify>no</verify></ThreeDSecure>',$this->_api3DSecureNoVerify->setRequest($fixture));
 	}
 	
 	/**
