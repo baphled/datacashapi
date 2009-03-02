@@ -17,6 +17,12 @@
 
 class DataCash_Api extends DataCash_Base {
 	
+	/**
+	 * Validation object used to validate DataCash information
+	 *
+	 * @var DataCash_Validate
+	 * 
+	 */
 	protected $_validate;
 	
 	/**
@@ -31,12 +37,12 @@ class DataCash_Api extends DataCash_Base {
 	}
 	
 	/**
-	 * Validates our requests parameters.
+	 * Validates our DataCash requests parameters.
 	 *
-	 * @param array $dataArray
+	 * @param	Array 	$dataArray	dataArray used to create our request body.
 	 */
 	private function _validateRequest($dataArray) {
-		if (!isset($this->_config->extendedPolicy->set)) {
+		if (!isset($this->_datacash->extendedPolicy->set)) {
 			throw new Zend_Exception('Must have extended policy setting in config file.');
 		}
 		if (empty($dataArray)) {
@@ -60,13 +66,13 @@ class DataCash_Api extends DataCash_Base {
 	 * to be is a withdrawal or a deposit.
 	 *
 	 * @param 	String 	$type	The type of request we are about to make.
-	 * @return 	String	$xml	Our resulting XML element
+	 * @return 	String	$xml	Our authentication XML element
 	 */
 	private function _handleAuth($type = 'deposit') {
 		$xml = xmlwriter_open_memory();
 		xmlwriter_start_element($xml, 'Authentication');
-		xmlwriter_write_element($xml, 'client', $this->_config->$type->client);
-		xmlwriter_write_element($xml, 'password', $this->_config->$type->password);
+		xmlwriter_write_element($xml, 'client', $this->_datacash->$type->client);
+		xmlwriter_write_element($xml, 'password', $this->_datacash->$type->password);
 		xmlwriter_end_element($xml);
 
 		return xmlwriter_output_memory($xml, true);
@@ -76,8 +82,9 @@ class DataCash_Api extends DataCash_Base {
 	 * Gets our card information and turns the data into the 
 	 * needed XML element.
 	 *
-	 * @param 	Array 	$cardDataArray
-	 * @return 	String	XML element.
+	 * @param 	Array 	$params	CardData parmeters
+	 * @return 	String	$xml	CardData XML element.
+	 * 
 	 */
 	private function _handleCardData($params = array()) {
 		$this->_validate->validateCard($params);
@@ -133,9 +140,10 @@ class DataCash_Api extends DataCash_Base {
 	/**
 	 * Handles our CV2 Address information
 	 *
-	 * @param string $xml
-	 * @param array $params
-	 * @return string
+	 * @param 	String	$xml		XML we want to write to.
+	 * @param 	Array 	$params		Address parameters.
+	 * @return 	String	$xml		Our address element.
+	 * 
 	 */
 	private function _handleAddress($xml, $params) {
 		if (array_key_exists('street_address1',$params)) {
@@ -159,8 +167,8 @@ class DataCash_Api extends DataCash_Base {
 	/**
 	 * Sets our Cv2Avs check inforamtion ready to send off to DataCash
 	 *
-	 * @param array $params
-	 * @return string	$xml	Our resulting request body for Cv2Avs element.
+	 * @param 	Array 	$params	Adress information needed to create Cv2Avs element
+	 * @return 	String	$xml	Our resulting request body for Cv2Avs element.
 	 * 
 	 */
 	private function _handleCV2Address($params) {
@@ -206,7 +214,7 @@ class DataCash_Api extends DataCash_Base {
 	 * Checks that we have all the needed extended policy data, 
 	 * throws exception if something goes wrong.
 	 *
-	 * @return bool
+	 * @return String	$xml	XML ExtendedPolicy element
 	 */
 	private function _handleExtendedPolicy() {
 		$this->_validate->validatePolicies();
@@ -228,20 +236,33 @@ class DataCash_Api extends DataCash_Base {
 	private function _handleThreeDSecure() {
 		$xml = xmlwriter_open_memory();
 		xmlwriter_start_element($xml, 'ThreeDSecure');
-		if(1 == $this->_config->threeDSecure->verify) {
-			$this->_validate->validate3DSecure();
-			xmlwriter_write_element($xml, 'verify', 'yes');
-			xmlwriter_write_element($xml, 'merchant_url', $this->_config->threeDSecure->merchant_url);
-			xmlwriter_write_element($xml, 'purchase_desc', $this->_config->threeDSecure->purchase_desc);
-			xmlwriter_write_element($xml, 'purchase_datetime', date('Ymd H:i:s'));
-			xmlwriter_start_element($xml, 'Browser');
-			xmlwriter_write_element($xml, 'device_category', $this->_config->threeDSecure->device_category);
-			xmlwriter_write_element($xml, 'accept_headers', $this->_config->threeDSecure->accept_headers);
-			xmlwriter_write_element($xml, 'user_agent', 'iBetX Browser');
-			xmlwriter_end_element($xml);
+		if(1 == $this->_datacash->threeDSecure->verify) {
+			$this->writeThreeDSecure();
 		} else {
-			xmlwriter_write_element($xml,'verify','no');
+			xmlwriter_write_raw($xml, xmlwriter_write_element($xml,'verify','no'));
 		}
+		xmlwriter_end_element($xml);
+		return xmlwriter_output_memory($xml,true);
+	}
+	
+	/**
+	 * Write 3DSecures element block.
+	 * 
+	 * Needed for 3DSecure verification.
+	 *
+	 * @return XML	$xml	3DSecure XML Element.
+	 */
+	private function writeThreeDSecure() {
+		$this->_validate->validate3DSecure();
+		$xml = xmlwriter_open_memory();
+		xmlwriter_write_element($xml, 'verify', 'yes');
+		xmlwriter_write_element($xml, 'merchant_url', $this->_datacash->threeDSecure->merchant_url);
+		xmlwriter_write_element($xml, 'purchase_desc', $this->_datacash->threeDSecure->purchase_desc);
+		xmlwriter_write_element($xml, 'purchase_datetime', date('Ymd H:i:s'));
+		xmlwriter_start_element($xml, 'Browser');
+		xmlwriter_write_element($xml, 'device_category', $this->_datacash->threeDSecure->device_category);
+		xmlwriter_write_element($xml, 'accept_headers', $this->_datacash->threeDSecure->accept_headers);
+		xmlwriter_write_element($xml, 'user_agent', $this->_datacash->browser);
 		xmlwriter_end_element($xml);
 		return xmlwriter_output_memory($xml,true);
 	}
@@ -250,7 +271,8 @@ class DataCash_Api extends DataCash_Base {
 	 * Creates our extended policy XML
 	 *
 	 * @param 	string 	$policy		Name of the extended policy
-	 * @return 	bool				True is valid, false otherwise
+	 * @return 	String	$xml		XML Extended policy element
+	 * 
 	 */
 	private function _writePolicy($policy = '') {
 		if(empty($policy)) {
@@ -258,11 +280,11 @@ class DataCash_Api extends DataCash_Base {
 		}
 		$xml = xmlwriter_open_memory();
 		xmlwriter_start_element($xml,$policy);
-		xmlwriter_write_attribute($xml,'notprovided',$this->_config->extendedPolicy->$policy->notprovided);
-		xmlwriter_write_attribute($xml,'notchecked',$this->_config->extendedPolicy->$policy->notchecked);
-		xmlwriter_write_attribute($xml,'matched',$this->_config->extendedPolicy->$policy->matched);
-		xmlwriter_write_attribute($xml,'notmatched',$this->_config->extendedPolicy->$policy->notmatched);
-		xmlwriter_write_attribute($xml,'partialmatch',$this->_config->extendedPolicy->$policy->partialmatch);
+		xmlwriter_write_attribute($xml,'notprovided',$this->_datacash->extendedPolicy->$policy->notprovided);
+		xmlwriter_write_attribute($xml,'notchecked',$this->_datacash->extendedPolicy->$policy->notchecked);
+		xmlwriter_write_attribute($xml,'matched',$this->_datacash->extendedPolicy->$policy->matched);
+		xmlwriter_write_attribute($xml,'notmatched',$this->_datacash->extendedPolicy->$policy->notmatched);
+		xmlwriter_write_attribute($xml,'partialmatch',$this->_datacash->extendedPolicy->$policy->partialmatch);
 		xmlwriter_end_element($xml);
 		return xmlwriter_output_memory($xml,true);
 	}
@@ -270,10 +292,10 @@ class DataCash_Api extends DataCash_Base {
 	/**
 	 * Writes our XML request which we need to send to DataCash
 	 *
-	 * @param string $auth
-	 * @param string $cardTxn
-	 * @param string $txnDetails
-	 * @return string
+	 * @param 	String 	$auth		XML authorisation element.
+	 * @param 	String 	$cardTxn	XML CardTxn element.
+	 * @param 	String 	$txnDetails	XML TxnDetails element.
+	 * @return 	String	$xml		XML Request element
 	 */
 	private function _writeRequest( $auth, $cardTxn, $txnDetails) {
 		$xml = xmlwriter_open_memory();

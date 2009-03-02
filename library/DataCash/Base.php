@@ -21,6 +21,6 @@ class DataCash_Base {
 			Zend_ConfigSettings::setUpConfig();
 		}
 		$config = Zend_Registry::get('general');
-		$this->_config = Zend_Registry::get($config->environment)->datacash;
+		$this->_datacash = Zend_Registry::get($config->environment)->datacash;
 	}
 }

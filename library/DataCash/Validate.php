@@ -16,13 +16,13 @@ class DataCash_Validate extends DataCash_Base {
 	 *
 	 */
 	function validate3DSecure() {
-		if(!isset($this->_config->threeDSecure->merchant_url) ||
-			!isset($this->_config->threeDSecure->purchase_desc) ||
-			!isset($this->_config->threeDSecure->device_category) ||
-			!isset($this->_config->threeDSecure->accept_headers)) {
+		if(!isset($this->_datacash->threeDSecure->merchant_url) ||
+			!isset($this->_datacash->threeDSecure->purchase_desc) ||
+			!isset($this->_datacash->threeDSecure->device_category) ||
+			!isset($this->_datacash->threeDSecure->accept_headers)) {
 				throw new Zend_Exception('Need to set 3DSecure properies.');
 			}
-		if(!isset($this->_config->threeDSecure->verify)) {
+		if(!isset($this->_datacash->threeDSecure->verify)) {
 			throw new Zend_Exception('Need to set 3DSecure verify property.');
 		}
 	}
@@ -34,11 +34,11 @@ class DataCash_Validate extends DataCash_Base {
 	 * @return 	bool				True is valid, false otherwise
 	 */
 	private function _policyEmpty($policy) {
-		if(empty($this->_config->extendedPolicy->$policy->notprovided) ||
-			 empty($this->_config->extendedPolicy->$policy->notchecked) ||
-			 empty($this->_config->extendedPolicy->$policy->matched) ||
-			 empty($this->_config->extendedPolicy->$policy->notmatched) ||
-			 empty($this->_config->extendedPolicy->$policy->partialmatch)) {
+		if(empty($this->_datacash->extendedPolicy->$policy->notprovided) ||
+			 empty($this->_datacash->extendedPolicy->$policy->notchecked) ||
+			 empty($this->_datacash->extendedPolicy->$policy->matched) ||
+			 empty($this->_datacash->extendedPolicy->$policy->notmatched) ||
+			 empty($this->_datacash->extendedPolicy->$policy->partialmatch)) {
 			 	return false;
 		}
 		return true;
@@ -51,11 +51,11 @@ class DataCash_Validate extends DataCash_Base {
 	 * @return 	bool				True is valid, false otherwise
 	 */
 	private function _policyCheckSet($policy) {
-		if(!isset($this->_config->extendedPolicy->$policy->notprovided) ||
-			 !isset($this->_config->extendedPolicy->$policy->notchecked) || 
-			 !isset($this->_config->extendedPolicy->$policy->matched) || 
-			 !isset($this->_config->extendedPolicy->$policy->notmatched) || 
-			 !isset($this->_config->extendedPolicy->$policy->partialmatch)) {
+		if(!isset($this->_datacash->extendedPolicy->$policy->notprovided) ||
+			 !isset($this->_datacash->extendedPolicy->$policy->notchecked) || 
+			 !isset($this->_datacash->extendedPolicy->$policy->matched) || 
+			 !isset($this->_datacash->extendedPolicy->$policy->notmatched) || 
+			 !isset($this->_datacash->extendedPolicy->$policy->partialmatch)) {
 			 	return false;
 			 }
 		return true;
@@ -71,7 +71,7 @@ class DataCash_Validate extends DataCash_Base {
 		if(empty($policy)) {
 			throw new Zend_exception('Policy must be valid');
 		}
-		if (0 !== $this->_config->extendedPolicy->set && 
+		if (0 !== $this->_datacash->extendedPolicy->set && 
 			false === ($this->_policyCheckSet($policy) || $this->_policyEmpty($policy))) {
 			return false;
 		}
@@ -106,10 +106,10 @@ class DataCash_Validate extends DataCash_Base {
 	 * 
 	 */
 	function validateCV2Avs($params = array()) {
-		if (empty($params) || !isset($this->_config->cv2avs->check)) {
+		if (empty($params) || !isset($this->_datacash->cv2avs->check)) {
 			throw new Zend_Exception('No datacash cv2avs settings, please resolve.');
 		} 
-		if (true === $this->_config->cv2avs->check && !array_key_exists('Cv2Avs', $params)) {
+		if (true === $this->_datacash->cv2avs->check && !array_key_exists('Cv2Avs', $params)) {
 			throw new Zend_Exception('CV2 data not present');
 		}
 	}
@@ -132,7 +132,7 @@ class DataCash_Validate extends DataCash_Base {
 	 * @param array $dataArray
 	 */
 	function validateRequest($dataArray) {
-		if (!isset($this->_config->extendedPolicy->set)) {
+		if (!isset($this->_datacash->extendedPolicy->set)) {
 			throw new Zend_Exception('Must have extended policy setting in config file.');
 		}
 		if (empty($dataArray)) {

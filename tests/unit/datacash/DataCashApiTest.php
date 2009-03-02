@@ -17,7 +17,7 @@ Zend_Loader::registerAutoload();
 class DataCashApiWrapper extends DataCash_Api  {
 	
 	function getConfig() {
-		return $this->_config;
+		return $this->_datacash;
 	}
 }
 
@@ -35,9 +35,9 @@ class DataCashApiWrapper extends DataCash_Api  {
  */
 class FakeConfig {
 	function __construct() {
-		$this->_config = new stdClass();
-		$this->_config->extendedPolicy =  new stdClass();
-		$this->_config->extendedPolicy->set = false;
+		$this->_datacash = new stdClass();
+		$this->_datacash->extendedPolicy =  new stdClass();
+		$this->_datacash->extendedPolicy->set = false;
 	}
 }
 
@@ -140,14 +140,11 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 		$config = $datacash_api->getConfig();
 		$this->assertType('Zend_Config',$config);
 		$this->assertEquals('https://testserver.datacash.com/Transaction',$config->host);
-		$this->assertNotEquals(null,$config->timeout);
-		$this->assertNotEquals(null,$config->logging);
-		$this->assertNotEquals(null,$config->logfile);
-		$this->assertNotEquals(null,$config->cacert_location);
-		$this->assertNotEquals(null,$config->deposit->client);
-		$this->assertNotEquals(null,$config->deposit->password);
-		$this->assertNotEquals(null,$config->withdrawal->client);
-		$this->assertNotEquals(null,$config->withdrawal->password);
+		$this->assertNotNull($config->timeout);
+		$this->assertNotNull($config->deposit->client);
+		$this->assertNotNull($config->deposit->password);
+		$this->assertNotNull($config->withdrawal->client);
+		$this->assertNotNull($config->withdrawal->password);
 	}
 	
 	function testSetResponseThrowsExceptionIfParametersArrayIsEmpty() {
@@ -281,6 +278,8 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	 */
 	function test3DSecureMethodReturnsEmptyElementIfConfigSetToYes() {
 		$fixture = $this->_fixture->find('CompleteDepositRequest');
-		$this->assertContains('yes',$this->_api->setRequest($fixture));
+		print_r($this->_api->setRequest($fixture));
+		$xml = $this->_xmlFixture->find('ExtendedPolicy');
+		$this->assertContains($xml[0],$this->_api->setRequest($fixture));
 	}
 }
