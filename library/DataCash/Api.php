@@ -17,6 +17,8 @@
 
 class DataCash_Api extends DataCash_Base {
 	
+	protected $_validate;
+	
 	/**
 	 * Gathers or configuration settings for DataCash
 	 *
@@ -25,44 +27,9 @@ class DataCash_Api extends DataCash_Base {
 	 */
 	function __construct($configPath = null,$file=null) {
 		parent::__construct($configPath,$file);
+		$this->_validate = new DataCash_Validate($configPath,$file);
 	}
 	
-	/**
-	 * Validates our parameters making sure we have card information.
-	 *
-	 * @param array $params
-	 */
-	private function _validateCard($params) {
-	if (!array_key_exists('Card',$params)) {
-			throw new Zend_Exception('No card data.');
-		}
-		$cardDataArray = $params['Card'];
-		if (empty($cardDataArray) ||
-			 !array_key_exists('pan',$cardDataArray) ||
-			 !array_key_exists('expirydate',$cardDataArray)) {
-			throw new Zend_Exception('Need to pass array containing cards details');
-		}
-		if (!array_key_exists('Cv2Avs',$params)) {
-			throw new Zend_Exception('No datacash cv2avs settings, please resolve.');
-		} 
-	}
-	
-	/**
-	 * Checks to see if we need to do a CV2 check, if so validates our params.
-	 *
-	 * @param array $params
-	 * @return string	$xml or false if not doing cv2 checks.
-	 * 
-	 */
-	private function _validateCV2Avs($params = array()) {
-		if (empty($params) || !isset($this->_config->cv2avs->check)) {
-			throw new Zend_Exception('No datacash cv2avs settings, please resolve.');
-		} 
-		if (true === $this->_config->cv2avs->check && !array_key_exists('Cv2Avs', $params)) {
-			throw new Zend_Exception('CV2 data not present');
-		}
-	}
-
 	/**
 	 * Validates our requests parameters.
 	 *
@@ -83,32 +50,6 @@ class DataCash_Api extends DataCash_Base {
 		if (!array_key_exists('Transaction',$dataArray)) {
 			throw new Zend_Exception('Must have transaction details.');
 		}
-	}
-
-	/**
-	 * Validate our policies, making sure that they are all set
-	 *
-	 */
-	private function _validatePolicies() {
-		if (false === ($this->_checkPolicy('cv2_policy') ||
-			$this->_checkPolicy('postcode_policy') ||
-			$this->_checkPolicy('address_policy'))) {
-			throw new Zend_Exception('All policies settings should be accessible.');
-		}
-	}
-	
-	/**
-	 * Makes sure we have set the nessary 3DSecure properties
-	 * in our configuration file.
-	 *
-	 */
-	private function _validate3DSecure() {
-		if(!isset($this->_config->threeDSecure->merchant_url) ||
-			!isset($this->_config->threeDSecure->purchase_desc) ||
-			!isset($this->_config->threeDSecure->device_category) ||
-			!isset($this->_config->threeDSecure->accept_headers)) {
-				throw new Zend_Exception('Need to set 3DSecure properies.');
-			}
 	}
 	
 	/**
@@ -139,8 +80,8 @@ class DataCash_Api extends DataCash_Base {
 	 * @return 	String	XML element.
 	 */
 	private function _handleCardData($params = array()) {
-		$this->_validateCard($params);
-		$this->_validateCv2Avs($params);
+		$this->_validate->validateCard($params);
+		$this->_validate->validateCv2Avs($params);
 		$cardDataArray = $params['Card'];
 		
 		$xml = xmlwriter_open_memory();
@@ -268,7 +209,7 @@ class DataCash_Api extends DataCash_Base {
 	 * @return bool
 	 */
 	private function _handleExtendedPolicy() {
-		$this->_validatePolicies();
+		$this->_validate->validatePolicies();
 		$xml = xmlwriter_open_memory();
 		xmlwriter_start_element($xml,'ExtendedPolicy');
 		xmlwriter_write_raw($xml, $this->_writePolicy('cv2_policy'));
@@ -285,13 +226,10 @@ class DataCash_Api extends DataCash_Base {
 	 * @return String	$xml	3DSecure XML result.
 	 */
 	private function _handleThreeDSecure() {
-		if(!isset($this->_config->threeDSecure->verify)) {
-			throw new Zend_Exception('Need to set 3DSecure verify property.');
-		}
 		$xml = xmlwriter_open_memory();
 		xmlwriter_start_element($xml, 'ThreeDSecure');
 		if(1 == $this->_config->threeDSecure->verify) {
-			$this->_validate3DSecure();
+			$this->_validate->validate3DSecure();
 			xmlwriter_write_element($xml, 'verify', 'yes');
 			xmlwriter_write_element($xml, 'merchant_url', $this->_config->threeDSecure->merchant_url);
 			xmlwriter_write_element($xml, 'purchase_desc', $this->_config->threeDSecure->purchase_desc);
@@ -299,64 +237,13 @@ class DataCash_Api extends DataCash_Base {
 			xmlwriter_start_element($xml, 'Browser');
 			xmlwriter_write_element($xml, 'device_category', $this->_config->threeDSecure->device_category);
 			xmlwriter_write_element($xml, 'accept_headers', $this->_config->threeDSecure->accept_headers);
-			xmlwriter_write_element($xml, 'user_agent', $_SERVER['HTTP_USER_AGENT']);
+			xmlwriter_write_element($xml, 'user_agent', 'iBetX Browser');
 			xmlwriter_end_element($xml);
 		} else {
 			xmlwriter_write_element($xml,'verify','no');
 		}
 		xmlwriter_end_element($xml);
 		return xmlwriter_output_memory($xml,true);
-	}
-	
-	/**
-	 * Checks our policy
-	 *
-	 * @param string $policy
-	 * @return bool
-	 */
-	private function _checkPolicy($policy = '') {
-		if(empty($policy)) {
-			throw new Zend_exception('Policy must be valid');
-		}
-		if (0 !== $this->_config->extendedPolicy->set && 
-			false === ($this->_policyCheckSet($policy) || $this->_policyEmpty($policy))) {
-			return false;
-		}
-		return true;
-	}
-	
-	/**
-	 * Determines whether our policy data is empty or not
-	 *
-	 * @param 	string 	$policy		Name of the extended policy
-	 * @return 	bool				True is valid, false otherwise
-	 */
-	private function _policyEmpty($policy) {
-		if(empty($this->_config->extendedPolicy->$policy->notprovided) ||
-			 empty($this->_config->extendedPolicy->$policy->notchecked) ||
-			 empty($this->_config->extendedPolicy->$policy->matched) ||
-			 empty($this->_config->extendedPolicy->$policy->notmatched) ||
-			 empty($this->_config->extendedPolicy->$policy->partialmatch)) {
-			 	return false;
-		}
-		return true;
-	}
-	
-	/**
-	 * Determines whether our policy data is set or not
-	 *
-	 * @param 	string 	$policy		Name of the extended policy
-	 * @return 	bool				True is valid, false otherwise
-	 */
-	private function _policyCheckSet($policy) {
-		if(!isset($this->_config->extendedPolicy->$policy->notprovided) ||
-			 !isset($this->_config->extendedPolicy->$policy->notchecked) || 
-			 !isset($this->_config->extendedPolicy->$policy->matched) || 
-			 !isset($this->_config->extendedPolicy->$policy->notmatched) || 
-			 !isset($this->_config->extendedPolicy->$policy->partialmatch)) {
-			 	return false;
-			 }
-		return true;
 	}
 	
 	/**

@@ -36,7 +36,8 @@ class DataCashApiWrapper extends DataCash_Api  {
 class FakeConfig {
 	function __construct() {
 		$this->_config = new stdClass();
-		$this->_config->extendedPolicy =  null;
+		$this->_config->extendedPolicy =  new stdClass();
+		$this->_config->extendedPolicy->set = false;
 	}
 }
 
@@ -55,7 +56,6 @@ class FakeConfig {
 class DatacashApiConfigWrapper extends DataCash_Api {
 	function __construct() {
 		$this->_config = new FakeConfig();
-		$this->_config->extendedPolicy->set = false;
 	}
 }
 
@@ -204,7 +204,6 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testSetCV2AvsCheckReturnsStringByDefault() {
 		$fixture = $this->_fixture->find('TestCv2AvsRequest');
-		print_r($fixture);
 		$result = $this->_api->setRequest($fixture);
 		$this->assertType('string',$result);
 	}
@@ -236,14 +235,13 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	function testSetCv2AddressResultIsNotNull() {
 		$fixture = $this->_fixture->find('TestCv2AvsSingleStreetAddressRequest');
 		$result = $this->_api->setRequest($fixture);
-		print_r($result);
 		$this->assertNotNull($result);
 		$this->assertContains('Cv2Avs',$result);
 		$this->assertContains('street_address1',$result);
 	}
 	
 	function testSetCv2DoesnotSetAddress2IfItIsNotSet() {
-		$fixture = $this->_fixture->find('NoStreetAddress2or3Request');
+		$fixture = $this->_fixture->find('TestCv2AvsNoStreetAddress2or3Request');
 		$result = $this->_api->setRequest($fixture);
 		$this->assertNotNull($result);
 		$this->assertNotContains('street_address2',$result);
@@ -251,7 +249,7 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	}
 	
 	function testSetCv2DoesNotHaveAddress() {
-		$fixture = $this->_fixture->find('NoStreetAddress2or3Request');
+		$fixture = $this->_fixture->find('TestCv2AvsNoStreetAddress2or3Request');
 		$result = $this->_api->setRequest($fixture);
 		$this->assertNotNull($result);
 		$this->assertNotContains('street_address2',$result);
