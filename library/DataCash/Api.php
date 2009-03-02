@@ -220,9 +220,9 @@ class DataCash_Api extends DataCash_Base {
 		$this->_validate->validatePolicies();
 		$xml = xmlwriter_open_memory();
 		xmlwriter_start_element($xml,'ExtendedPolicy');
-		xmlwriter_write_raw($xml, $this->_writePolicy('cv2_policy'));
-		xmlwriter_write_raw($xml, $this->_writePolicy('postcode_policy'));
-		xmlwriter_write_raw($xml, $this->_writePolicy('address_policy'));
+		xmlwriter_write_raw($xml, $this->_handlePolicy('cv2_policy'));
+		xmlwriter_write_raw($xml, $this->_handlePolicy('postcode_policy'));
+		xmlwriter_write_raw($xml, $this->_handlePolicy('address_policy'));
 		xmlwriter_end_element($xml);
 		return xmlwriter_output_memory($xml,true);
 	}
@@ -237,7 +237,7 @@ class DataCash_Api extends DataCash_Base {
 		$xml = xmlwriter_open_memory();
 		xmlwriter_start_element($xml, 'ThreeDSecure');
 		if(1 == $this->_datacash->threeDSecure->verify) {
-			$this->writeThreeDSecure();
+			$this->_handleThreeDSecureVerify();
 		} else {
 			xmlwriter_write_raw($xml, xmlwriter_write_element($xml,'verify','no'));
 		}
@@ -252,7 +252,7 @@ class DataCash_Api extends DataCash_Base {
 	 *
 	 * @return XML	$xml	3DSecure XML Element.
 	 */
-	private function writeThreeDSecure() {
+	private function _handleThreeDSecureVerify() {
 		$this->_validate->validate3DSecure();
 		$xml = xmlwriter_open_memory();
 		xmlwriter_write_element($xml, 'verify', 'yes');
@@ -274,7 +274,7 @@ class DataCash_Api extends DataCash_Base {
 	 * @return 	String	$xml		XML Extended policy element
 	 * 
 	 */
-	private function _writePolicy($policy = '') {
+	private function _handlePolicy($policy = '') {
 		if(empty($policy)) {
 			throw new Zend_Exception('Invalid '.$policy .', unable to write.');
 		}

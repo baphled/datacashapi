@@ -278,7 +278,6 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	 */
 	function test3DSecureMethodReturnsEmptyElementIfConfigSetToYes() {
 		$fixture = $this->_fixture->find('CompleteDepositRequest');
-		print_r($this->_api->setRequest($fixture));
 		$xml = $this->_xmlFixture->find('ExtendedPolicy');
 		$this->assertContains($xml[0],$this->_api->setRequest($fixture));
 	}
