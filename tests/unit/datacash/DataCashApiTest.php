@@ -281,4 +281,31 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 		$xml = $this->_xmlFixture->find('ExtendedPolicy');
 		$this->assertContains($xml[0],$this->_api->setRequest($fixture));
 	}
+	
+	/**
+	 * We need to setup a request for our 3DSecure authorisation request
+	 * which will pass the pares & reference to DataCash
+	 */
+	function testSet3DSecureAuthRequestThrowsExceptionIfReferenceMoreThan16() {
+		$this->setExpectedException('Zend_Exception');
+		$this->_api->set3DSecureAuthRequest('as123123asd234dasf3w4134edd','3123123123');
+	}
+	
+	function testSet3DSecureAuthRequestThrowsExceptionIfParesIsNotSet() {
+		$this->setExpectedException('Zend_Exception');
+		$this->_api->set3DSecureAuthRequest('','1234567890123456');
+	}
+	
+	function testSet3DSecureAuthRequestReturnsAuthenticationElement() {
+		$expected = '<Request><Authentication><client>clientNameDeposit</client><password>passwordDeposit</password></Authentication><Transaction><HistoricTxn><reference>1234567890123456</reference><method tx_status_u="accept">threedsecure_authorization_request</method><pares_message>as123123asd234dasf3w4134edd</pares_message></HistoricTxn></Transaction></Request>';
+		$result = $this->_api->set3DSecureAuthRequest('as123123asd234dasf3w4134edd','1234567890123456','deposit');
+		$this->assertContains('Request',$result);
+		$this->assertContains('Authentication',$result);
+		$this->assertContains('Transaction',$result);
+		$this->assertContains('HistoricTxn',$result);
+		$this->assertContains('reference',$result);
+		$this->assertContains('method',$result);
+		$this->assertContains('pares_message',$result);
+		$this->assertEquals($expected,$result);
+	}
 }

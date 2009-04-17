@@ -322,4 +322,38 @@ class DataCash_Api extends DataCash_Base {
 		$txnDetails = $this->_handleTxnDetails($dataArray['Transaction']);
 		return $this->_writeRequest($auth, $cardTxn, $txnDetails);
 	}
+	
+	/**
+	 * Sets our 3DSecure request to confirm the transaction.
+	 *
+	 * @param string $pares
+	 * @param string $reference
+	 * @param string $method
+	 * @return SimpleXML
+	 * 
+	 */
+	function set3DSecureAuthRequest($pares,$reference,$method='deposit') {
+		if(is_null($pares) || empty($pares)) {
+			throw new Zend_Exception('PaRes is not set');
+		}
+		if(strlen($reference) !== 16) {
+			throw new Zend_Exception('Reference must be 16 characters long');
+		}
+		$xml = xmlwriter_open_memory();
+		xmlwriter_start_element($xml, 'Request');
+		$auth = $this->_handleAuth($method);
+		xmlwriter_write_raw($xml, $auth);
+		xmlwriter_start_element($xml, 'Transaction');
+		xmlwriter_start_element($xml, 'HistoricTxn');
+		xmlwriter_write_element($xml, 'reference', $reference);
+		xmlwriter_start_element($xml, 'method');
+		xmlwriter_write_attribute($xml,'tx_status_u','accept');
+		xmlwriter_write_raw($xml,'threedsecure_authorization_request');
+		xmlwriter_end_element($xml);
+		xmlwriter_write_element($xml, 'pares_message', $pares);
+		xmlwriter_end_element($xml);
+		xmlwriter_end_element($xml);
+		xmlwriter_end_element($xml);
+		return xmlwriter_output_memory($xml,true);
+	}
 }
