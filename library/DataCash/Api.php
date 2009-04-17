@@ -68,7 +68,7 @@ class DataCash_Api extends DataCash_Base {
 	 * @param 	String 	$type	The type of request we are about to make.
 	 * @return 	String	$xml	Our authentication XML element
 	 */
-	private function _handleAuth($type = 'deposit') {
+	private function _handleAuth($type = 'deposits') {
 		$xml = xmlwriter_open_memory();
 		xmlwriter_start_element($xml, 'Authentication');
 		xmlwriter_write_element($xml, 'client', $this->_datacash->$type->client);
@@ -315,7 +315,7 @@ class DataCash_Api extends DataCash_Base {
 	 * @param 	Array	 	$dataArray 	Our request array, holds all the relevant data to create the request XML
 	 * @return 	String		$xml		The XML request we want to send to DataCash
 	 */
-	function setRequest($dataArray = array(), $method='deposit') {
+	function setRequest($dataArray = array(), $method='deposits') {
 		$this->_validateRequest($dataArray);
 		$auth = $this->_handleAuth($method);
 		$cardTxn = $this->_handleCardTxn($dataArray);
@@ -332,7 +332,7 @@ class DataCash_Api extends DataCash_Base {
 	 * @return SimpleXML
 	 * 
 	 */
-	function set3DSecureAuthRequest($pares,$reference,$method='deposit') {
+	function set3DSecureAuthRequest($pares,$reference,$method='deposits') {
 		if(is_null($pares) || empty($pares)) {
 			throw new Zend_Exception('PaRes is not set');
 		}
