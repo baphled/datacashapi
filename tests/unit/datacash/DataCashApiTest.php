@@ -120,7 +120,7 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	}
 	
 	function testDataCashApiHasConfigProperty() {
-		$this->assertClassHasAttribute('_config','DataCash_Api');
+		$this->assertClassHasAttribute('_datacash','DataCash_Api');
 	}
 	
 	function testDataCashConfigPropertyIsNullWhenNotSet() {
@@ -307,5 +307,9 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 		$this->assertContains('method',$result);
 		$this->assertContains('pares_message',$result);
 		$this->assertEquals($expected,$result);
+	}
+	
+	function testCanGetDataCashFees() {
+		$this->assertEquals(0.100,$this->_api->getFees());
 	}
 }

@@ -6,7 +6,7 @@ class DataCash_Base {
 	 *
 	 * @var String	Authentication XML element.
 	 */
-	protected $_config;
+	protected $_datacash;
 	
 	/**
 	 * Gathers or configuration settings for DataCash
@@ -22,5 +22,9 @@ class DataCash_Base {
 		}
 		$config = Zend_Registry::get('general');
 		$this->_datacash = Zend_Registry::get($config->environment)->datacash;
+	}
+	
+	function getFees() {
+		return (float)$this->_datacash->fees;
 	}
 }
