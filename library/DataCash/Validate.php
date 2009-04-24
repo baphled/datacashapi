@@ -1,4 +1,20 @@
 <?php
+/**
+ * DataCashApi
+ * 
+ * DataCash Validation object
+ * 
+ * Used to validate the values needed to pass off to DataCash
+ * to make a transactional request.
+ * 
+ * @author Yomi (baphled) Colledge <yomi@boodah.net> 2009
+ * @version $Id$
+ * @package DataCashApi
+ * @subpackage DataCashApi
+ *
+ * $LastChangedBy: yomi $
+ */
+
 class DataCash_Validate extends DataCash_Base {
 	/**
 	 * Gathers or configuration settings for DataCash

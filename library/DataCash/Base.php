@@ -1,6 +1,18 @@
 <?php
+/**
+ * DataCash_Base
+ * 
+ * Used to abstract our DataCash commonalitise
+ * 
+ * @author Yomi (baphled) Colledge <yomi@boodah.net> 2009
+ * @version $Id$
+ * @package DataCashApi
+ * @subpackage DataCashApi
+ *
+ * $LastChangedBy: yomi $
+ */
 
-class DataCash_Base {
+abstract class DataCash_Base {
 	/**
 	 * Will store outhentication element
 	 *
