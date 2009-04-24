@@ -141,10 +141,10 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 		$this->assertType('Zend_Config',$config);
 		$this->assertEquals('https://testserver.datacash.com/Transaction',$config->host);
 		$this->assertNotNull($config->timeout);
-		$this->assertNotNull($config->deposit->client);
-		$this->assertNotNull($config->deposit->password);
-		$this->assertNotNull($config->withdrawal->client);
-		$this->assertNotNull($config->withdrawal->password);
+		$this->assertNotNull($config->deposits->client);
+		$this->assertNotNull($config->deposits->password);
+		$this->assertNotNull($config->withdrawals->client);
+		$this->assertNotNull($config->withdrawals->password);
 	}
 	
 	function testSetResponseThrowsExceptionIfParametersArrayIsEmpty() {
@@ -298,7 +298,7 @@ class DataCashApiTest extends PHPUnit_Framework_TestCase {
 	
 	function testSet3DSecureAuthRequestReturnsAuthenticationElement() {
 		$expected = '<Request><Authentication><client>clientNameDeposit</client><password>passwordDeposit</password></Authentication><Transaction><HistoricTxn><reference>1234567890123456</reference><method tx_status_u="accept">threedsecure_authorization_request</method><pares_message>as123123asd234dasf3w4134edd</pares_message></HistoricTxn></Transaction></Request>';
-		$result = $this->_api->set3DSecureAuthRequest('as123123asd234dasf3w4134edd','1234567890123456','deposit');
+		$result = $this->_api->set3DSecureAuthRequest('as123123asd234dasf3w4134edd','1234567890123456','deposits');
 		$this->assertContains('Request',$result);
 		$this->assertContains('Authentication',$result);
 		$this->assertContains('Transaction',$result);
